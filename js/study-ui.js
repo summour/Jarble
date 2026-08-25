@@ -324,16 +324,7 @@
         </div>
       `;
     } else {
-      const hintBanner = `
-        <div class="ios-drag-hint-banner">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-          </svg>
-          Drag vertically across cards to select rapidly
-        </div>
-      `;
-
-      listEl.innerHTML = hintBanner + filteredWords.map(w => {
+      listEl.innerHTML = filteredWords.map(w => {
         const id = String(w.id);
         const isSel = studySelectedWordIds.has(id);
         const typeStr = (w.type || 'N').split(',')[0].toUpperCase();
@@ -357,10 +348,6 @@
           </div>
         `;
       }).join('');
-    }
-
-    if (window.WordJarDragSelect?.bind) {
-      window.WordJarDragSelect.bind('studyWordSelectList', 'study');
     }
 
     syncStudySelectionUI();
