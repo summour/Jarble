@@ -14,6 +14,10 @@
   let currentStudyDeckTargetId = null;
   let studyPreviousScreen = 'home';
   let lLearnedThisSession = 0;
+  let cachedFilteredStudyWords = [];
+  let renderedStudyCount = 0;
+  const STUDY_CHUNK_SIZE = 80;
+  let searchDebounceTimer = null;
 
   function injectStyles() {
     if (document.getElementById('studySkipStyle')) return;
@@ -293,30 +297,94 @@
     }
   };
 
+  function buildWordItemHTML(w) {
+    const id = String(w.id);
+    const isSel = studySelectedWordIds.has(id);
+    const typeStr = (w.type || 'N').split(',')[0].toUpperCase();
+    return `
+      <div class="study-word-item ${isSel ? 'selected' : ''}" data-word-id="${escHTML(id)}">
+        <div class="select-circle ${isSel ? 'selected' : ''}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+        <div class="wm" style="padding-right:0;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="wen">${escHTML(w.word)}</span>
+            <span class="tt">${escHTML(typeStr)}</span>
+          </div>
+          ${w.pronunciation ? `<div class="wpn">${escHTML(w.pronunciation)}</div>` : ''}
+          <div class="wth">${escHTML(w.meaning)}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function appendStudyWordChunk() {
+    const listEl = document.getElementById('studyWordSelectList');
+    if (!listEl || renderedStudyCount >= cachedFilteredStudyWords.length) return;
+
+    const nextBatch = cachedFilteredStudyWords.slice(renderedStudyCount, renderedStudyCount + STUDY_CHUNK_SIZE);
+    if (!nextBatch.length) return;
+
+    const fragmentHtml = nextBatch.map(buildWordItemHTML).join('');
+    listEl.insertAdjacentHTML('beforeend', fragmentHtml);
+    renderedStudyCount += nextBatch.length;
+  }
+
+  function setupStudyWordScrollListener() {
+    const listEl = document.getElementById('studyWordSelectList');
+    const pageEl = document.getElementById('pg-study-word-select') || window;
+    if (!listEl) return;
+
+    if (!listEl.dataset.scrollBound) {
+      listEl.dataset.scrollBound = 'true';
+      const onScroll = () => {
+        if (curPage !== 'study-word-select') return;
+        const scrollBottom = (document.documentElement.scrollHeight || document.body.scrollHeight) - (window.scrollY + window.innerHeight);
+        if (scrollBottom < 600) {
+          appendStudyWordChunk();
+        }
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+    }
+
+    if (!listEl.dataset.clickBound) {
+      listEl.dataset.clickBound = 'true';
+      listEl.addEventListener('click', (e) => {
+        const item = e.target.closest('.study-word-item');
+        if (!item) return;
+        const wordId = item.dataset.wordId;
+        if (wordId) toggleStudyWordSelection(wordId, item);
+      });
+    }
+  }
+
   /**
    * Renders the interactive word list inside Word Selection page.
    */
   window.renderStudyWordSelectList = function renderStudyWordSelectList() {
     const listEl = document.getElementById('studyWordSelectList');
-    const badgeEl = document.getElementById('studySelectedBadge');
-    const startBtn = document.getElementById('btnStartRecite');
     const searchVal = (document.getElementById('studyWordSearch')?.value || '').trim().toLowerCase();
 
     if (!listEl) return;
+    setupStudyWordScrollListener();
 
     const allDeckWords = (D.words || []).filter(w => {
       if (!currentStudyDeckTargetId) return true;
       return String(w.deckId) === String(currentStudyDeckTargetId);
     });
 
-    const filteredWords = allDeckWords.filter(w => {
+    cachedFilteredStudyWords = allDeckWords.filter(w => {
       if (!searchVal) return true;
       const wordText = (w.word || '').toLowerCase();
       const meaningText = (w.meaning || '').toLowerCase();
       return wordText.includes(searchVal) || meaningText.includes(searchVal);
     });
 
-    if (!filteredWords.length) {
+    renderedStudyCount = 0;
+
+    if (!cachedFilteredStudyWords.length) {
       listEl.innerHTML = `
         <div class="empty" style="padding: 30px 10px;">
           <div class="empty-title" style="font-size:16px;">No words found</div>
@@ -324,37 +392,26 @@
         </div>
       `;
     } else {
-      listEl.innerHTML = filteredWords.map(w => {
-        const id = String(w.id);
-        const isSel = studySelectedWordIds.has(id);
-        const typeStr = (w.type || 'N').split(',')[0].toUpperCase();
-        return `
-          <div class="study-word-item ${isSel ? 'selected' : ''}" data-word-id="${escHTML(id)}" onclick="toggleStudyWordSelection('${escHTML(id)}')">
-            <div class="select-circle ${isSel ? 'selected' : ''}">
-              ${isSel ? `
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              ` : ''}
-            </div>
-            <div class="wm" style="padding-right:0;">
-              <div style="display:flex; align-items:center; gap:8px;">
-                <span class="wen">${escHTML(w.word)}</span>
-                <span class="tt">${escHTML(typeStr)}</span>
-              </div>
-              ${w.pronunciation ? `<div class="wpn">${escHTML(w.pronunciation)}</div>` : ''}
-              <div class="wth">${escHTML(w.meaning)}</div>
-            </div>
-          </div>
-        `;
-      }).join('');
+      const initialBatch = cachedFilteredStudyWords.slice(0, STUDY_CHUNK_SIZE);
+      listEl.innerHTML = initialBatch.map(buildWordItemHTML).join('');
+      renderedStudyCount = initialBatch.length;
     }
 
     syncStudySelectionUI();
   };
 
   /**
-   * Syncs the badges and buttons without re-rendering the whole DOM tree (critical for smooth drag selection).
+   * Debounced search handler for smooth 60fps typing even with 3000+ words.
+   */
+  window.handleStudyWordSearchInput = function handleStudyWordSearchInput() {
+    if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = setTimeout(() => {
+      renderStudyWordSelectList();
+    }, 100);
+  };
+
+  /**
+   * Syncs the badges and buttons without re-rendering the whole DOM tree (critical for instant responsiveness).
    */
   window.syncStudySelectionUI = function syncStudySelectionUI() {
     const badgeEl = document.getElementById('studySelectedBadge');
@@ -395,22 +452,34 @@
   };
 
   /**
-   * Toggle a word's selection state.
+   * Ultra-fast single-card toggle with zero lag (O(1) DOM mutation, no list rebuild).
    *
    * @param {string} wordId
+   * @param {HTMLElement} [targetEl]
    */
-  window.toggleStudyWordSelection = function toggleStudyWordSelection(wordId) {
+  window.toggleStudyWordSelection = function toggleStudyWordSelection(wordId, targetEl = null) {
     const id = String(wordId);
-    if (studySelectedWordIds.has(id)) {
-      studySelectedWordIds.delete(id);
-    } else {
+    const isSel = !studySelectedWordIds.has(id);
+
+    if (isSel) {
       studySelectedWordIds.add(id);
+    } else {
+      studySelectedWordIds.delete(id);
     }
-    renderStudyWordSelectList();
+
+    const listEl = document.getElementById('studyWordSelectList');
+    const el = targetEl || listEl?.querySelector(`[data-word-id="${id}"]`);
+    if (el) {
+      el.classList.toggle('selected', isSel);
+      const circle = el.querySelector('.select-circle');
+      if (circle) circle.classList.toggle('selected', isSel);
+    }
+
+    syncStudySelectionUI();
   };
 
   /**
-   * Select All or Clear selection in Word Selection.
+   * Fast Select All or Clear selection in Word Selection.
    *
    * @param {boolean} selectAll
    */
@@ -425,7 +494,18 @@
     } else {
       studySelectedWordIds.clear();
     }
-    renderStudyWordSelectList();
+
+    const listEl = document.getElementById('studyWordSelectList');
+    if (listEl) {
+      const items = listEl.querySelectorAll('.study-word-item');
+      items.forEach(el => {
+        el.classList.toggle('selected', selectAll);
+        const circle = el.querySelector('.select-circle');
+        if (circle) circle.classList.toggle('selected', selectAll);
+      });
+    }
+
+    syncStudySelectionUI();
   };
 
   /**

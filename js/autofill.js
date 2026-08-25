@@ -571,11 +571,19 @@ async function autoFillWord() {
     if (!isSelectMode || wordjarBulkFillRunning) return;
 
     const sid = String(id);
-    if (selectedCards.has(sid)) selectedCards.delete(sid);
+    const wasSel = selectedCards.has(sid);
+    if (wasSel) selectedCards.delete(sid);
     else selectedCards.add(sid);
 
+    const isSel = !wasSel;
+    const el = document.getElementById('deckCardsList')?.querySelector(`[data-card-id="${sid}"]`);
+    if (el) {
+      el.classList.toggle('selected-card', isSel);
+      const circle = el.querySelector('.select-circle');
+      if (circle) circle.classList.toggle('selected', isSel);
+    }
+
     updateDeckBulkActions();
-    renderDeckCardsBulk();
   }
 
   async function autoFillSelectedCards() {

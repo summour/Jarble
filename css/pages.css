@@ -235,7 +235,8 @@
   display: flex; align-items: center; justify-content: center;
 }
 .select-circle.selected { border-color: var(--ink); background: var(--ink); }
-.select-circle svg { width: 14px; height: 14px; stroke-width: 3; }
+.select-circle svg { width: 14px; height: 14px; stroke-width: 3; display: none; }
+.select-circle.selected svg { display: block; }
 .select-action-bar { z-index: 900; }
 .select-action-bar .btn { min-height: 48px; font-size: 15px; border-radius: 16px; }
 
