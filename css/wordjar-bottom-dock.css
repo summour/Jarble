@@ -5,8 +5,8 @@
 */
 
 :root {
-  --wordjar-dock-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
-  --wordjar-dock-height: 70px;
+  --wordjar-dock-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  --wordjar-dock-height: 56px;
 }
 
 .app .main-header {
@@ -34,10 +34,6 @@ body:not(:has(#pg-home.active)) .app .main-header {
   background: transparent !important;
 }
 
-body:has(#pg-mushy-chat.active) .app .main-header {
-  z-index: 1750 !important;
-}
-
 .app .brand {
   max-width: none !important;
   flex: 0 0 auto !important;
@@ -61,23 +57,23 @@ html body .app .top-nav {
   bottom: var(--wordjar-dock-bottom) !important;
   left: 50% !important;
   z-index: 1700 !important;
-  width: min(calc(100vw - 42px), 430px) !important;
+  width: min(calc(100vw - 32px), 248px) !important;
   height: var(--wordjar-dock-height) !important;
   min-width: 0 !important;
-  max-width: 430px !important;
+  max-width: 248px !important;
   display: grid !important;
-  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
   align-items: center !important;
   justify-items: center !important;
   gap: 2px !important;
-  padding: 8px !important;
+  padding: 4px 6px !important;
   margin: 0 !important;
-  border: 1px solid rgba(228, 228, 231, 0.78) !important;
+  border: 0.5px solid rgba(220, 220, 225, 0.8) !important;
   border-radius: 999px !important;
-  background: rgba(255, 255, 255, 0.88) !important;
-  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.12) !important;
-  backdrop-filter: blur(22px) saturate(1.35) !important;
-  -webkit-backdrop-filter: blur(22px) saturate(1.35) !important;
+  background: rgba(255, 255, 255, 0.84) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+  backdrop-filter: blur(24px) saturate(1.8) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.8) !important;
   transform: translateX(-50%) !important;
   overflow: hidden !important;
   box-sizing: border-box !important;
@@ -92,54 +88,54 @@ html body .app .top-nav::after {
 }
 
 .app .top-btn {
-  width: 52px !important;
-  height: 52px !important;
+  width: 100% !important;
+  max-width: 48px !important;
+  height: 44px !important;
   min-width: 0 !important;
-  min-height: 52px !important;
+  min-height: 44px !important;
   padding: 0 !important;
   border: 0 !important;
   border-radius: 999px !important;
   background: transparent !important;
   box-shadow: none !important;
-  color: #151515 !important;
+  color: #48484a !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  transition: background 0.18s ease, transform 0.18s ease !important;
+  transition: background 0.16s ease, transform 0.16s ease, color 0.16s ease !important;
 }
 
 .app .top-btn.active {
-  background: rgba(17, 17, 17, 0.08) !important;
+  background: rgba(0, 0, 0, 0.06) !important;
+  color: #111111 !important;
 }
 
 .app .top-btn:active {
-  background: rgba(17, 17, 17, 0.11) !important;
-  transform: scale(0.96) !important;
+  background: rgba(0, 0, 0, 0.09) !important;
+  transform: scale(0.92) !important;
 }
 
-.app .top-btn svg,
-.app #tb-reader svg,
-.app #tb-mushy-chat svg {
-  width: 25px !important;
-  height: 25px !important;
-  stroke-width: 2.35 !important;
+.app .top-btn svg {
+  width: 21px !important;
+  height: 21px !important;
+  stroke-width: 2.1 !important;
 }
 
 .app .page {
   padding-bottom: calc(
-    var(--wordjar-dock-height) + 42px + env(safe-area-inset-bottom, 0px)
+    var(--wordjar-dock-height) + 28px + env(safe-area-inset-bottom, 0px)
   ) !important;
 }
 
 .app #cardSelectActions.select-action-bar {
   bottom: calc(
-    var(--wordjar-dock-height) + 28px + env(safe-area-inset-bottom, 0px)
+    var(--wordjar-dock-height) + 16px + env(safe-area-inset-bottom, 0px)
   ) !important;
 }
 
 @media (max-width: 430px) {
   :root {
-    --wordjar-dock-height: 68px;
+    --wordjar-dock-height: 54px;
   }
 
   .app .main-header {
@@ -154,42 +150,38 @@ html body .app .top-nav::after {
 
   html body .app .main-header > .top-nav,
   html body .app .top-nav {
-    width: min(calc(100vw - 34px), 396px) !important;
-    padding: 7px !important;
+    width: min(calc(100vw - 28px), 236px) !important;
+    padding: 4px 5px !important;
   }
 
   .app .top-btn {
-    width: 50px !important;
-    height: 50px !important;
-    min-height: 50px !important;
+    max-width: 44px !important;
+    height: 42px !important;
+    min-height: 42px !important;
   }
 
-  .app .top-btn svg,
-  .app #tb-reader svg,
-  .app #tb-mushy-chat svg {
-    width: 24px !important;
-    height: 24px !important;
+  .app .top-btn svg {
+    width: 20px !important;
+    height: 20px !important;
   }
 }
 
-@media (max-width: 380px) {
+@media (max-width: 370px) {
   html body .app .main-header > .top-nav,
   html body .app .top-nav {
-    width: min(calc(100vw - 26px), 360px) !important;
+    width: min(calc(100vw - 20px), 216px) !important;
     gap: 0 !important;
-    padding: 6px !important;
+    padding: 3px 4px !important;
   }
 
   .app .top-btn {
-    width: 46px !important;
-    height: 46px !important;
-    min-height: 46px !important;
+    max-width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
   }
 
-  .app .top-btn svg,
-  .app #tb-reader svg,
-  .app #tb-mushy-chat svg {
-    width: 22px !important;
-    height: 22px !important;
+  .app .top-btn svg {
+    width: 19px !important;
+    height: 19px !important;
   }
 }

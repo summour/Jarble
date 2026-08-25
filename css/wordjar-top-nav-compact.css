@@ -39,7 +39,7 @@
   min-width: 0;
   max-width: 100%;
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   align-items: center;
   justify-items: center;
   gap: var(--wordjar-nav-gap);
@@ -74,9 +74,7 @@
   background: rgba(17, 17, 17, 0.08);
 }
 
-.app .top-btn svg,
-.app #tb-reader svg,
-.app #tb-mushy-chat svg {
+.app .top-btn svg {
   width: var(--wordjar-icon-size);
   height: var(--wordjar-icon-size);
   flex: 0 0 auto;
@@ -86,9 +84,7 @@
 .app #tb-home { order: 1; }
 .app #tb-decks { order: 2; }
 .app #tb-words { order: 3; }
-.app #tb-reader { order: 4; }
-.app #tb-mushy-chat { order: 5; }
-.app #tb-account { order: 6; }
+.app #tb-account { order: 4; }
 
 @media (max-width: 767px) {
   .app .main-header {

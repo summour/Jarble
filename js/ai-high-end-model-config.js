@@ -432,95 +432,12 @@
     return normalizeAnalysis(extractJSON(output));
   }
 
-  function analysisHTML(result, userLevel = getUserLevel()) {
-    const vocab = Array.isArray(result?.vocabulary_focus) ? result.vocabulary_focus : [];
-    return `
-      <div class="wordjar-reader-ai-card">
-        <div class="wordjar-reader-ai-title">Smart Analysis · ${safeText(userLevel)} · ${safeText(window.WordJarAIConfig.lastModel || 'Gemini')}</div>
-        <div class="wordjar-reader-ai-section">
-          <div class="wordjar-reader-ai-label">Translation</div>
-          <div class="wordjar-reader-ai-text">${safeText(result?.translation || 'No translation returned.')}</div>
-        </div>
-        <div class="wordjar-reader-ai-section">
-          <div class="wordjar-reader-ai-label">Grammar</div>
-          <div class="wordjar-reader-ai-text">${safeText(result?.grammar_explanation || 'No grammar explanation returned.')}</div>
-        </div>
-        <div class="wordjar-reader-ai-section">
-          <div class="wordjar-reader-ai-label">Vocabulary Focus</div>
-          <div class="wordjar-reader-ai-list">
-            ${vocab.length ? vocab.map(item => `
-              <div class="wordjar-reader-ai-vocab">
-                <b>${safeText(item.word)}</b>
-                <span>${safeText(item.meaning)}</span>
-                <span>${safeText(item.why_important)}</span>
-              </div>
-            `).join('') : '<div class="wordjar-reader-ai-text">No vocabulary focus returned.</div>'}
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  async function runReaderSmartAnalysisHighEnd() {
-    if (analysisRunning) return;
-
-    const slot = document.getElementById('wordjarReaderAIAnalysisSlot');
-    const btn = document.getElementById('wordjarReaderAIAnalyzeBtn');
-    const text = document.querySelector('#readerPanel .reader-context')?.textContent || '';
-    if (!String(text || '').trim()) {
-      safeToast('No sentence to analyze');
-      return;
-    }
-
-    analysisRunning = true;
-    const oldText = btn?.textContent || 'Smart Analysis';
-    if (btn) {
-      btn.disabled = true;
-      btn.textContent = 'Pro analyzing...';
-    }
-    if (slot) {
-      slot.innerHTML = `
-        <div class="wordjar-reader-ai-card">
-          <div class="wordjar-reader-ai-title">Smart Analysis</div>
-          <div class="wordjar-reader-ai-text">High-end Gemini is analyzing the story context...</div>
-        </div>
-      `;
-    }
-
-    try {
-      const result = await smartTranslateAndAnalyzeHighEnd(text, getUserLevel());
-      if (slot) slot.innerHTML = analysisHTML(result, getUserLevel());
-      safeToast('Analysis ready');
-    } catch (err) {
-      console.warn('High-end reader analysis failed', err);
-      const message = userFacingError(err);
-      if (slot) {
-        slot.innerHTML = `
-          <div class="wordjar-reader-ai-card">
-            <div class="wordjar-reader-ai-title">Smart Analysis</div>
-            <div class="wordjar-reader-ai-error">${safeText(message)}</div>
-          </div>
-        `;
-      }
-      safeToast(message);
-    } finally {
-      analysisRunning = false;
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = oldText;
-      }
-    }
-  }
-
   function bindButtons() {
     const wordBtn = document.getElementById('wordjarSmartFillBtn');
     if (wordBtn) wordBtn.onclick = smartFillWordHighEnd;
 
     const deckBtn = document.getElementById('btnSmartFillSelectedCards');
     if (deckBtn) deckBtn.onclick = smartFillSelectedCardsHighEnd;
-
-    const readerBtn = document.getElementById('wordjarReaderAIAnalyzeBtn');
-    if (readerBtn) readerBtn.onclick = runReaderSmartAnalysisHighEnd;
   }
 
   function boot() {
@@ -537,14 +454,10 @@
 
   window.smartFillWord = smartFillWordHighEnd;
   window.smartFillSelectedCards = smartFillSelectedCardsHighEnd;
-  window.smartTranslateAndAnalyze = smartTranslateAndAnalyzeHighEnd;
-  window.runReaderSmartAnalysis = runReaderSmartAnalysisHighEnd;
   window.WordJarHighEndAI = {
     fetchHighEndSmartFill,
     smartFillWord: smartFillWordHighEnd,
-    smartFillSelectedCards: smartFillSelectedCardsHighEnd,
-    smartTranslateAndAnalyze: smartTranslateAndAnalyzeHighEnd,
-    runReaderSmartAnalysis: runReaderSmartAnalysisHighEnd
+    smartFillSelectedCards: smartFillSelectedCardsHighEnd
   };
 
   boot();

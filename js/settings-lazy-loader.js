@@ -11,7 +11,6 @@
   function loadSettingsModules() {
     if (
       window.WordJarSettingsOrder?.orderSettingsRows &&
-      window.WordJarReaderCleanSettings?.mountSettings &&
       window.openFlashcardDisplayModal &&
       window.openSyncSettingsModal
     ) {
@@ -22,7 +21,6 @@
     settingsLoadPromise = Promise.resolve()
       .then(() => loadWordJarModule('js/flashcard-display-settings.js'))
       .then(() => loadWordJarModule('js/sync-settings.js'))
-      .then(() => loadWordJarModule('js/reader-clean-settings.js'))
       .then(() => loadWordJarModule('js/settings-order.js'))
       .catch(err => {
         settingsLoadPromise = null;
@@ -34,7 +32,6 @@
 
   function refreshAccountOnce() {
     if (curPage === 'account' && typeof updateAccount === 'function') updateAccount();
-    if (window.WordJarReaderCleanSettings?.mountSettings) WordJarReaderCleanSettings.mountSettings();
     if (window.WordJarSettingsOrder?.orderSettingsRows) WordJarSettingsOrder.orderSettingsRows();
   }
 

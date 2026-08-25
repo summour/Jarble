@@ -11,8 +11,8 @@
     style.id = 'uiStandardizeStyle';
     style.textContent = `
       .ph { min-height:52px; align-items:center; }
-      .ph-title, .home-title, .reader-title { line-height:1.05; }
-      .btn, .btn-s, .btn-p, .dict-add-btn, .reader-process-btn, .tts-action-btn { box-sizing:border-box; }
+      .ph-title, .home-title { line-height:1.05; }
+      .btn, .btn-s, .btn-p, .dict-add-btn, .tts-action-btn { box-sizing:border-box; }
       .btn.btn-s, .btn.btn-p { min-height:42px; }
       .dict-add-btn { width:44px !important; height:44px !important; min-width:44px !important; padding:0 !important; display:inline-flex !important; align-items:center !important; justify-content:center !important; }
       .search-row { align-items:center; gap:10px; }
@@ -27,8 +27,6 @@
       'tb-home': 'Dashboard',
       'tb-decks': 'Decks',
       'tb-words': 'Dictionary',
-      'tb-reader': 'Reader',
-      'tb-mushy-chat': 'Mushy',
       'tb-account': 'Account'
     };
     Object.entries(labels).forEach(([id, label]) => {

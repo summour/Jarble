@@ -1,4 +1,4 @@
-// WordJar Firebase Configuration
+// Jarble Firebase Configuration
 // This file should NOT be committed to version control.
 // Copy this file to firebase-config.js and fill in your actual Firebase config.
 

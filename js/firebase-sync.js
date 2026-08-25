@@ -67,7 +67,7 @@ function getCloudBackupPayload() {
   data.meta.updatedBy = 'firestore-cloud-save';
 
   return {
-    app: 'WordJar',
+    app: 'Jarble',
     version: SK,
     backupType: 'firestore-single-document',
     updatedAtClient: data.meta.updatedAt,
@@ -351,8 +351,6 @@ function refreshActivePageUI() {
   else if (page === 'decks' && typeof renderDecks === 'function') renderDecks();
   else if (page === 'words' && typeof renderWords === 'function') renderWords();
   else if (page === 'account' && typeof updateAccount === 'function') updateAccount();
-  else if (page === 'reader' && typeof renderReader === 'function') renderReader();
-  else if (page === 'mushy-chat' && window.WordJarMushyChat?.render) WordJarMushyChat.render();
   else if (page === 'fc' && typeof renderFC === 'function') renderFC();
   else if (page === 'learn' && typeof renderLearn === 'function') renderLearn();
   else if (page === 'deck-overview' && currentStudyDeckId && typeof showDeckOverview === 'function') showDeckOverview(currentStudyDeckId);
@@ -367,8 +365,6 @@ function refreshAllVisibleUI() {
   if (typeof renderDecks === 'function') renderDecks();
   if (typeof updateAccount === 'function') updateAccount();
   if (curPage === 'words' && typeof renderWords === 'function') renderWords();
-  if (curPage === 'reader' && typeof renderReader === 'function') renderReader();
-  if (curPage === 'mushy-chat' && window.WordJarMushyChat?.render) WordJarMushyChat.render();
   if (curPage === 'fc' && typeof renderFC === 'function') renderFC();
   if (curPage === 'deck-overview' && currentStudyDeckId && typeof showDeckOverview === 'function') showDeckOverview(currentStudyDeckId);
   if (curPage === 'deck-cards' && typeof renderDeckCards === 'function') renderDeckCards();
@@ -383,7 +379,6 @@ function loadWordJarLateModules() {
     'js/ios-comfort-typography.js',
     'js/type-consistency-fix.js',
     'js/share-card-options-complete.js',
-    'js/reader-notes-format-novel.js',
     'js/save-performance.js',
     'js/free-first-maintenance.js',
     'js/app-integrity.js',
@@ -403,30 +398,18 @@ function loadWordJarLateModules() {
     'js/word-actions-performance.js',
     'js/flashcard-display-settings.js',
     'js/sync-settings.js',
-    'js/reader-clean-settings.js',
-    'js/reader-clean-modal-size-fix.js',
-    'js/reader-voice-settings.js',
-    'js/reader-voice-tts-bridge.js',
     'js/private-api-key-cloud.js',
     'js/smart-fill-ai.js',
     'js/ai-high-end-model-config.js',
     'js/ai-gemini-model-fix.js',
-    'js/wordjar-mushy-router.js',
-    'js/wordjar-mushy-chat.js',
-    'js/wordjar-mushy-profile-avatar-patch.js',
     'js/deck-clean-smart-actions.js',
     'js/select-smart-fill-polish.js',
     'js/select-smart-all-batch.js',
-    'js/wordjar-mushy-deck-fill-bridge.js',
     'js/profile-user-level.js',
     'js/settings-order.js',
-    'js/reader-lazy-loader.js',
     'js/settings-lazy-loader.js',
     'js/ui-standardize.js',
-    'js/performance-scheduler.js',
-    'js/reader-notes-editor-toolbar.js',
-    'js/reader-note-learning-surface.js',
-    'js/wordjar-mushy-long-answer-fix.js'
+    'js/performance-scheduler.js'
   ];
 
   const idleModules = [

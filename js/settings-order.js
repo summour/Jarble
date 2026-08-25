@@ -9,7 +9,6 @@
     'Edit Profile',
     'Voice Settings',
     'Flashcard Display',
-    'Reader Text Clean',
     'Dashboard Statistics',
     'System Deck',
     'Sync Settings',
@@ -23,8 +22,6 @@
   function orderSettingsRows() {
     const menu = document.querySelector('#pg-account .menu-sec');
     if (!menu) return;
-
-    if (window.WordJarReaderCleanSettings?.mountSettings) WordJarReaderCleanSettings.mountSettings();
 
     const rows = Array.from(menu.querySelectorAll(':scope > .mr'));
     const used = new Set();

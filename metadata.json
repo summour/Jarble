@@ -1,0 +1,6 @@
+{
+  "name": "Jarble",
+  "description": "A vocabulary learning and flashcard application with spaced repetition, dictionary autofill, and custom avatars",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

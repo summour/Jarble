@@ -347,12 +347,12 @@ function normalizeWordJarData(data) {
 }
 
 function exportJSONBackup() {
-  const payload = { app: 'WordJar', version: SK, exportedAt: new Date().toISOString(), data: D };
+  const payload = { app: 'Jarble', version: SK, exportedAt: new Date().toISOString(), data: D };
   const json = JSON.stringify(payload, null, 2);
   const date = new Date().toISOString().slice(0, 10);
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([json], { type: 'application/json;charset=utf-8' }));
-  a.download = `wordjar-backup-${date}.json`;
+  a.download = `jarble-backup-${date}.json`;
   a.click();
   URL.revokeObjectURL(a.href);
   toast('JSON backup exported');
@@ -367,7 +367,7 @@ function handleJSONImport(event) {
       const parsed = JSON.parse(e.target.result);
       const restored = normalizeWordJarData(parsed.data || parsed);
       if (!Array.isArray(restored.words) || !Array.isArray(restored.decks)) throw new Error('Invalid structure');
-      if (confirm('Restore this JSON backup? This will replace current local WordJar data.')) {
+      if (confirm('Restore this JSON backup? This will replace current local Jarble data.')) {
         D = restored;
         normalizeWordDeckIds();
         save();
@@ -375,7 +375,7 @@ function handleJSONImport(event) {
         toast('JSON backup restored');
       }
     } catch (err) {
-      alert('Invalid WordJar JSON backup. No data was changed.');
+      alert('Invalid Jarble JSON backup. No data was changed.');
     }
     event.target.value = '';
   };

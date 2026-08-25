@@ -188,15 +188,53 @@
     }
   }
 
+  async function callServerModel(model, prompt, maxTokens, forceJson) {
+    const response = await fetch('/api/gemini', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model,
+        apiVersion: API_VERSION,
+        payload: buildBody(prompt, maxTokens, forceJson)
+      })
+    });
+
+    const raw = await response.text();
+    let payload = null;
+    try { payload = JSON.parse(raw); } catch (err) {}
+
+    if (!response.ok) {
+      const apiMessage = payload?.error?.message || raw || `HTTP ${response.status}`;
+      const error = new Error(`AI_${response.status}: ${apiMessage}`);
+      error.status = response.status;
+      error.model = model;
+      error.apiMessage = apiMessage;
+      throw error;
+    }
+
+    const text = payload?.candidates?.[0]?.content?.parts?.map(part => part.text || '').join('\n') || '';
+    if (!text.trim()) throw new Error(`EMPTY_AI_RESPONSE from ${model}`);
+
+    window.WordJarAIConfig = window.WordJarAIConfig || {};
+    window.WordJarAIConfig.lastModel = model;
+    return text;
+  }
+
   async function callGemini(prompt, options = {}) {
-    const apiKey = await ensureApiKey();
+    let apiKey = '';
+    try { apiKey = await ensureApiKey(); } catch (e) {}
+
     const models = options.models || MODELS;
     const maxTokens = options.maxTokens || 900;
     let lastError = null;
 
     for (const model of models) {
       try {
-        return await callModel(apiKey, model, prompt, maxTokens, options.forceJson !== false);
+        if (apiKey) {
+          return await callModel(apiKey, model, prompt, maxTokens, options.forceJson !== false);
+        } else {
+          return await callServerModel(model, prompt, maxTokens, options.forceJson !== false);
+        }
       } catch (err) {
         lastError = err;
         lastGeminiError = err;
@@ -204,7 +242,11 @@
 
         if (options.forceJson !== false && shouldFallback(err)) {
           try {
-            return await callModel(apiKey, model, prompt, maxTokens, false);
+            if (apiKey) {
+              return await callModel(apiKey, model, prompt, maxTokens, false);
+            } else {
+              return await callServerModel(model, prompt, maxTokens, false);
+            }
           } catch (retryErr) {
             lastError = retryErr;
             lastGeminiError = retryErr;

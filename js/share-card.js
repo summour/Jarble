@@ -334,7 +334,7 @@ async function shareAdjustedDetailWord() {
 
     if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({
-        title: `WordJar: ${w.word}`,
+        title: `Jarble: ${w.word}`,
         text: `${w.word} — ${w.meaning || ''}`,
         files: [file]
       });
@@ -373,7 +373,7 @@ async function shareDetailWord() {
 
     if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({
-        title: `WordJar: ${w.word}`,
+        title: `Jarble: ${w.word}`,
         text: `${w.word} — ${w.meaning || ''}`,
         files: [file]
       });
