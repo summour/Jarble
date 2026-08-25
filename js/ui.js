@@ -104,40 +104,107 @@ function saveDeck() {
 }
 
 function openDeckOptionsModal(id) {
-  const d = D.decks.find(x => x.id === id);
-  if(!d) return;
-  editDeckId = id;
-  document.getElementById('optDeckTitle').textContent = `Options: ${d.name}`;
-  const opt = d.options || { newPerDay: 25, revPerDay: 999, ignoreRev: false, limitsTop: false, learnSteps: '1m 10m', insertOrder: 'seq', reLearnSteps: '10m', leechThresh: 8, leechAction: 'tag' };
-  document.getElementById('optNewPerDay').value = opt.newPerDay || 25;
-  document.getElementById('optRevPerDay').value = opt.revPerDay || 999;
-  document.getElementById('optIgnoreRev').checked = !!opt.ignoreRev;
-  document.getElementById('optLimitsTop').checked = !!opt.limitsTop;
-  document.getElementById('optLearnSteps').value = opt.learnSteps || '1m 10m';
-  document.getElementById('optOrder').value = opt.insertOrder || 'seq';
-  document.getElementById('optReLearnSteps').value = opt.reLearnSteps || '10m';
-  document.getElementById('optLeechThresh').value = opt.leechThresh || 8;
-  document.getElementById('optLeechAction').value = opt.leechAction || 'tag';
+  const targetId = id || currentStudyDeckId;
+  const d = D.decks.find(x => String(x.id) === String(targetId));
+  if (!d) return;
+  editDeckId = d.id;
+
+  const titleEl = document.getElementById('deckOptTitle') || document.getElementById('optDeckTitle');
+  if (titleEl) titleEl.textContent = `${d.name} Settings`;
+
+  const opts = d.options || {};
+  const newPerDayEl = document.getElementById('optNewPerDay');
+  if (newPerDayEl) newPerDayEl.value = opts.newPerDay || 20;
+
+  const revPerDayEl = document.getElementById('optRevPerDay');
+  if (revPerDayEl) revPerDayEl.value = opts.revPerDay || 100;
+
+  const newOrderEl = document.getElementById('optNewOrder');
+  if (newOrderEl) {
+    const validOrders = ['added', 'random', 'sequential'];
+    newOrderEl.value = validOrders.includes(opts.newOrder) ? opts.newOrder : 'added';
+  }
+
+  const autoAudioEl = document.getElementById('optAutoPlayAudio') || document.getElementById('optAutoAudio');
+  if (autoAudioEl) {
+    autoAudioEl.checked = opts.autoAudio !== undefined ? !!opts.autoAudio : (D.profile?.autoPlay !== false);
+  }
+
+  const paceEl = document.getElementById('optReviewPace');
+  if (paceEl) {
+    if (opts.intMod && opts.intMod > 1.1) paceEl.value = 'relaxed';
+    else if (opts.intMod && opts.intMod < 0.9) paceEl.value = 'intensive';
+    else paceEl.value = 'standard';
+  }
+
   openO('deckOptionsModal');
 }
 
 function saveDeckOptions() {
-  const d = D.decks.find(x => x.id === editDeckId);
-  if(!d) return;
-  d.options = {
-    newPerDay: parseInt(document.getElementById('optNewPerDay').value) || 25,
-    revPerDay: parseInt(document.getElementById('optRevPerDay').value) || 999,
-    ignoreRev: document.getElementById('optIgnoreRev').checked,
-    limitsTop: document.getElementById('optLimitsTop').checked,
-    learnSteps: document.getElementById('optLearnSteps').value.trim(),
-    insertOrder: document.getElementById('optOrder').value,
-    reLearnSteps: document.getElementById('optReLearnSteps').value.trim(),
-    leechThresh: parseInt(document.getElementById('optLeechThresh').value) || 8,
-    leechAction: document.getElementById('optLeechAction').value
-  };
+  const targetId = editDeckId || currentStudyDeckId;
+  const d = D.decks.find(x => String(x.id) === String(targetId));
+  if (!d) return;
+
+  const newPerDay = Math.max(1, Math.min(500, parseInt(document.getElementById('optNewPerDay')?.value, 10) || 20));
+  const revPerDay = Math.max(1, Math.min(9999, parseInt(document.getElementById('optRevPerDay')?.value, 10) || 100));
+  const newOrder = document.getElementById('optNewOrder')?.value || 'added';
+  const autoAudio = !!(document.getElementById('optAutoPlayAudio')?.checked ?? document.getElementById('optAutoAudio')?.checked);
+  const pace = document.getElementById('optReviewPace')?.value || 'standard';
+
+  let intMod = 1.0;
+  let easyInt = 4;
+  if (pace === 'relaxed') {
+    intMod = 1.25;
+    easyInt = 6;
+  } else if (pace === 'intensive') {
+    intMod = 0.8;
+    easyInt = 3;
+  }
+
+  d.options = Object.assign({}, d.options || {}, {
+    newPerDay,
+    revPerDay,
+    newOrder,
+    autoAudio,
+    intMod,
+    easyInt
+  });
+
+  if (D.profile) {
+    D.profile.autoPlay = autoAudio;
+  }
+
   save();
-  closeO('deckOptionsModal');
+  closeDeckOptionsModal();
   toast('Settings saved');
+
+  if (typeof showDeckOverview === 'function' && currentStudyDeckId === d.id && curPage === 'deck-overview') {
+    showDeckOverview(d.id);
+  }
+}
+
+function closeDeckOptionsModal() {
+  closeO('deckOptionsModal');
+}
+
+function resetDeckOptionsDefault() {
+  const targetId = editDeckId || currentStudyDeckId;
+  const d = D.decks.find(x => String(x.id) === String(targetId));
+  if (!d) return;
+
+  d.options = null;
+  const newPerDayEl = document.getElementById('optNewPerDay');
+  if (newPerDayEl) newPerDayEl.value = 20;
+  const revPerDayEl = document.getElementById('optRevPerDay');
+  if (revPerDayEl) revPerDayEl.value = 100;
+  const newOrderEl = document.getElementById('optNewOrder');
+  if (newOrderEl) newOrderEl.value = 'added';
+  const autoAudioEl = document.getElementById('optAutoPlayAudio') || document.getElementById('optAutoAudio');
+  if (autoAudioEl) autoAudioEl.checked = true;
+  const paceEl = document.getElementById('optReviewPace');
+  if (paceEl) paceEl.value = 'standard';
+
+  toast('Reset to clean defaults');
 }
 
 // DECK OVERVIEW

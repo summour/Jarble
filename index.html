@@ -510,69 +510,103 @@ try {
 </div>
   
 <div class="overlay" id="deckOptionsModal">
-  <div class="modal-card" style="background:var(--sur2); padding:16px;">
-    <div class="modal-header" style="margin-bottom:12px;">
-      <div class="sh-title" id="optDeckTitle" style="font-size:18px;">Learning Settings</div>
-      <button class="btn-close" onclick="closeO('deckOptionsModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
+  <div class="modal-card" style="max-height:85vh; display:flex; flex-direction:column; padding:0; background:var(--bg); border-radius:24px; overflow:hidden; box-shadow: 0 25px 60px rgba(0,0,0,0.22);">
     
-    <div class="settings-card" style="margin:0 0 12px 0; padding:16px; background:#fff; border-radius: 12px;">
-      <div style="font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom:12px;">Daily Limits</div>
-      <div class="opt-row" style="flex-direction:column; align-items:stretch; border:none; padding:6px 0;">
-        <div class="opt-label" style="margin-bottom:6px;">New cards/day</div>
-        <input type="number" class="fi" id="optNewPerDay" value="25">
-      </div>
-      <div class="opt-row" style="flex-direction:column; align-items:stretch; border:none; padding:6px 0;">
-        <div class="opt-label" style="margin-bottom:6px;">Maximum reviews/day</div>
-        <input type="number" class="fi" id="optRevPerDay" value="999">
-      </div>
-      <div class="opt-row" style="padding:12px 0 6px; justify-content: space-between; border-bottom: 1px solid var(--bdr);">
-        <div class="opt-label">New cards ignore review limit</div>
-        <label class="switch"><input type="checkbox" id="optIgnoreRev"><span class="slider"></span></label>
-      </div>
-      <div class="opt-row" style="padding:12px 0 0; justify-content: space-between; border:none;">
-        <div class="opt-label">Limits start from top</div>
-        <label class="switch"><input type="checkbox" id="optLimitsTop"><span class="slider"></span></label>
+    <!-- iOS Header with Sheet Grabber -->
+    <div style="padding: 12px 20px 14px; background:var(--sur); border-bottom: 1px solid var(--bdr); display:flex; flex-direction:column; align-items:center; position:relative;">
+      <div style="width:36px; height:4px; border-radius:999px; background:var(--bdr); opacity:0.8; margin-bottom:12px;"></div>
+      <div style="width:100%; display:flex; justify-content:space-between; align-items:center;">
+        <div style="font-weight:700; font-size:17px; color:var(--ink);" id="optDeckTitle">Learning Settings</div>
+        <button class="btn-close" type="button" onclick="closeO('deckOptionsModal')" style="position:static;" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
       </div>
     </div>
-    
-    <div class="settings-card" style="margin:0 0 12px 0; padding:16px; background:#fff; border-radius: 12px;">
-      <div style="font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom:12px;">New Cards</div>
-      <div class="opt-row" style="flex-direction:column; align-items:stretch; border:none; padding:6px 0;">
-        <div class="opt-label" style="margin-bottom:6px;">Learning steps</div>
-        <input type="text" class="fi" id="optLearnSteps" value="1m 10m">
+
+    <!-- Scrollable Inset Grouped Settings Body -->
+    <div style="flex:1; overflow-y:auto; padding:18px 18px 24px; display:flex; flex-direction:column; gap:16px;">
+
+      <!-- Group 1: Daily Study Goals -->
+      <div style="background:var(--sur); border:1px solid var(--bdr); border-radius:18px; padding:6px 16px; box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+        <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:var(--ink3); padding:10px 0 6px;">Daily Limits</div>
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-top:1px solid var(--bdr);">
+          <div>
+            <div style="font-size:14px; font-weight:600; color:var(--ink);">New cards / day</div>
+            <div style="font-size:12px; color:var(--ink2);">Daily target for new vocabulary</div>
+          </div>
+          <input type="number" class="opt-input" id="optNewPerDay" value="20" min="1" max="500" style="width:72px; text-align:center; padding:8px 6px; font-size:15px; font-weight:700; border-radius:10px; border:1px solid var(--bdr); background:var(--sur2); color:var(--ink);">
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-top:1px solid var(--bdr);">
+          <div>
+            <div style="font-size:14px; font-weight:600; color:var(--ink);">Maximum reviews / day</div>
+            <div style="font-size:12px; color:var(--ink2);">Review limit for spaced repetition</div>
+          </div>
+          <input type="number" class="opt-input" id="optRevPerDay" value="100" min="1" max="9999" style="width:72px; text-align:center; padding:8px 6px; font-size:15px; font-weight:700; border-radius:10px; border:1px solid var(--bdr); background:var(--sur2); color:var(--ink);">
+        </div>
       </div>
-      <div class="opt-row" style="flex-direction:column; align-items:stretch; border:none; padding:6px 0;">
-        <div class="opt-label" style="margin-bottom:6px;">Insertion order</div>
-        <select class="fi" id="optOrder">
-          <option value="seq">Sequential (oldest first)</option>
-          <option value="rand">Random</option>
-        </select>
+
+      <!-- Group 2: Learning Preferences & Audio -->
+      <div style="background:var(--sur); border:1px solid var(--bdr); border-radius:18px; padding:6px 16px; box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+        <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:var(--ink3); padding:10px 0 6px;">Card Order & Audio</div>
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-top:1px solid var(--bdr);">
+          <div>
+            <div style="font-size:14px; font-weight:600; color:var(--ink);">Card display order</div>
+            <div style="font-size:12px; color:var(--ink2);">Order for displaying new words</div>
+          </div>
+          <select id="optNewOrder" style="padding:8px 12px; font-size:13px; font-weight:600; border-radius:10px; border:1px solid var(--bdr); background:var(--sur2); color:var(--ink);">
+            <option value="added">Order added</option>
+            <option value="random">Randomized</option>
+          </select>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-top:1px solid var(--bdr);">
+          <div>
+            <div style="font-size:14px; font-weight:600; color:var(--ink);">Auto-play pronunciation</div>
+            <div style="font-size:12px; color:var(--ink2);">Speak audio when card is shown</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="optAutoPlayAudio" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
       </div>
+
+      <!-- Group 3: Memory Interval Pace -->
+      <div style="background:var(--sur); border:1px solid var(--bdr); border-radius:18px; padding:6px 16px; box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+        <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:var(--ink3); padding:10px 0 6px;">Memory Interval Pace</div>
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-top:1px solid var(--bdr);">
+          <div>
+            <div style="font-size:14px; font-weight:600; color:var(--ink);">Repetition speed</div>
+            <div style="font-size:12px; color:var(--ink2);">Interval pace for spaced memory</div>
+          </div>
+          <select id="optReviewPace" style="padding:8px 12px; font-size:13px; font-weight:600; border-radius:10px; border:1px solid var(--bdr); background:var(--sur2); color:var(--ink);">
+            <option value="relaxed">Relaxed (Longer gaps)</option>
+            <option value="standard" selected>Standard (Balanced)</option>
+            <option value="intensive">Intensive (Frequent)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Hidden compatibility inputs for legacy code -->
+      <input type="hidden" id="optIgnoreRev" value="0">
+      <input type="hidden" id="optLimitsTop" value="0">
+      <input type="hidden" id="optLearnSteps" value="1m 10m">
+      <input type="hidden" id="optOrder" value="seq">
+      <input type="hidden" id="optReLearnSteps" value="10m">
+      <input type="hidden" id="optLeechThresh" value="8">
+      <input type="hidden" id="optLeechAction" value="tag">
+      <input type="hidden" id="optAutoAudio" value="0">
+
     </div>
-    
-    <div class="settings-card" style="margin:0 0 12px 0; padding:16px; background:#fff; border-radius: 12px;">
-      <div style="font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom:12px;">Lapses</div>
-      <div class="opt-row" style="flex-direction:column; align-items:stretch; border:none; padding:6px 0;">
-        <div class="opt-label" style="margin-bottom:6px;">Relearning steps</div>
-        <input type="text" class="fi" id="optReLearnSteps" value="10m">
-      </div>
-      <div class="opt-row" style="flex-direction:column; align-items:stretch; border:none; padding:6px 0;">
-        <div class="opt-label" style="margin-bottom:6px;">Leech threshold</div>
-        <input type="number" class="fi" id="optLeechThresh" value="8">
-      </div>
-      <div class="opt-row" style="flex-direction:column; align-items:stretch; border:none; padding:6px 0;">
-        <div class="opt-label" style="margin-bottom:6px;">Leech action</div>
-        <select class="fi" id="optLeechAction">
-          <option value="tag">Tag Only</option>
-          <option value="suspend">Suspend Card</option>
-        </select>
-      </div>
-    </div>
-    
-    <div class="form-row" style="margin-top: 12px;">
-      <button class="btn btn-s" style="flex:1" onclick="closeO('deckOptionsModal')">Cancel</button>
-      <button class="btn btn-p" style="flex:2" onclick="saveDeckOptions()">Save Settings</button>
+
+    <!-- iOS Bottom Action Buttons -->
+    <div style="padding:14px 18px 20px; border-top:1px solid var(--bdr); background:var(--sur); display:flex; gap:12px;">
+      <button class="btn btn-s" type="button" style="flex:1; padding:13px; font-size:14px; font-weight:600; border-radius:14px;" onclick="resetDeckOptionsDefault()">Reset</button>
+      <button class="btn btn-p" type="button" style="flex:1.6; padding:13px; font-size:14px; font-weight:700; border-radius:14px;" onclick="saveDeckOptions()">Save Settings</button>
     </div>
   </div>
 </div>
