@@ -1005,10 +1005,51 @@ try {
 
 <div class="toast" id="toast"></div>
  
+<script>
+var SK = 'wordjar_v4';
+window.SK = SK;
+var D = window.D || {
+  words: [], decks: [],
+  profile: {
+    name: 'User',
+    id: 'wj-' + Math.random().toString(36).slice(2,8),
+    avatar: 'idle',
+    voice: 'en-US',
+    voiceSpeed: 0.95,
+    autoPlay: true,
+    ipaAccent: 'us'
+  },  
+  todayDone: 0, lastDate: '', studyDays: {}
+};
+window.D = D;
+
+var curPage = 'home';
+var prevPage = 'words';
+var prevDeckCardsPage = 'decks';
+var pageIds = ['home','decks','words','account'];
+var editDeckId = null;
+var selDCol = '#09090b';
+var activeMenuDeckId = null;
+var wordFilters = {
+  type: '',
+  starred: false,
+  lang: 'all'
+};
+var editWordId = null;          
+var detailWordId = null;        
+var selectedTypes = new Set();  
+var fcQ = [], fcI = 0;
+var lList = [], lI = 0;
+var currentStudyDeckId = null;
+var importTargetDeckId = null; 
+var isSelectMode = false;
+var selectedCards = new Set();
+</script>
 <script src="js/storage.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/autofill.js"></script>
 <script src="js/study-ui.js"></script>
+<script src="js/ios-card-swipe.js"></script>
 <script src="js/share-card.js"></script>
 <script src="js/firebase-sync.js"></script>
 <script src="js/app.js"></script>

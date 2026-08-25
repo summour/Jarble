@@ -250,6 +250,7 @@
   function applyRecoveredData(data, source, toastUser = false) {
     if (!data || !Array.isArray(data.words)) return false;
     D = data;
+    window.D = D;
     if (typeof normalizeWordDeckIds === 'function') normalizeWordDeckIds();
     stampLocalChange(`restore-${source}`);
     const payload = JSON.stringify(D);
@@ -319,6 +320,7 @@
         if (!confirmed) return;
 
         D = restored;
+        window.D = D;
         if (typeof normalizeWordDeckIds === 'function') normalizeWordDeckIds();
         if (window.WordJarFSRS?.migrateAllCards) WordJarFSRS.migrateAllCards();
         if (window.WordJarAppIntegrity?.run) WordJarAppIntegrity.run({ silent: true });

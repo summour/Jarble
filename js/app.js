@@ -1,7 +1,9 @@
 // state + ระบบที่ยังไม่ได้แยก
 // STATE
-const SK = 'wordjar_v4';
-let D = {
+var SK = window.SK || 'wordjar_v4';
+window.SK = SK;
+
+var D = window.D || {
   words: [], decks: [],
   profile: {
     name: 'User',
@@ -14,29 +16,30 @@ let D = {
   },  
   todayDone: 0, lastDate: '', studyDays: {}
 };
+window.D = D;
  
-let curPage = 'home';
-let prevPage = 'words';
-let prevDeckCardsPage = 'decks';
-const pageIds = ['home','decks','words','account'];
-let editDeckId = null, selDCol = '#09090b', activeMenuDeckId = null;
-let wordFilters = {
+var curPage = 'home';
+var prevPage = 'words';
+var prevDeckCardsPage = 'decks';
+var pageIds = ['home','decks','words','account'];
+var editDeckId = null, selDCol = '#09090b', activeMenuDeckId = null;
+var wordFilters = {
   type: '',
   starred: false,
   lang: 'all'
 };
 
-let editWordId = null;          
-let detailWordId = null;        
-let selectedTypes = new Set();  
-let fcQ = [], fcI = 0;
-let lList = [], lI = 0;
-let currentStudyDeckId = null;
-let importTargetDeckId = null; 
+var editWordId = null;          
+var detailWordId = null;        
+var selectedTypes = new Set();  
+var fcQ = [], fcI = 0;
+var lList = [], lI = 0;
+var currentStudyDeckId = null;
+var importTargetDeckId = null; 
 
 // Multi-select State
-let isSelectMode = false;
-let selectedCards = new Set();
+var isSelectMode = false;
+var selectedCards = new Set();
 
 function setWordTypeFilter(type) {
   wordFilters.type = type || '';

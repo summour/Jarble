@@ -1,5 +1,23 @@
 // localStorage / CSV / JSON
 // DATA LAYER
+var SK = window.SK || 'wordjar_v4';
+window.SK = SK;
+
+var D = window.D || {
+  words: [], decks: [],
+  profile: {
+    name: 'User',
+    id: 'wj-' + Math.random().toString(36).slice(2,8),
+    avatar: 'idle',
+    voice: 'en-US',
+    voiceSpeed: 0.95,
+    autoPlay: true,
+    ipaAccent: 'us'
+  },  
+  todayDone: 0, lastDate: '', studyDays: {}
+};
+window.D = D;
+
 const SYSTEM_NO_DECK_ID = '__wordjar_system_no_deck__';
 const SYSTEM_NO_DECK_NAME = 'No Deck';
 
@@ -53,6 +71,7 @@ function load() {
       const saved = JSON.parse(raw);
       if (saved) {
         D = saved;
+        window.D = D;
         hasSavedData = true;
       }
     }
@@ -369,6 +388,7 @@ function handleJSONImport(event) {
       if (!Array.isArray(restored.words) || !Array.isArray(restored.decks)) throw new Error('Invalid structure');
       if (confirm('Restore this JSON backup? This will replace current local Jarble data.')) {
         D = restored;
+        window.D = D;
         normalizeWordDeckIds();
         save();
         updateHome(); renderWords(); renderDecks(); updateAccount();

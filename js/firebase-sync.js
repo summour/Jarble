@@ -257,6 +257,7 @@ async function saveCloudBackup() {
 
 function applyCloudBackupData(restored) {
   D = restored;
+  window.D = D;
   D.meta = D.meta || {};
   D.meta.updatedAt = new Date().toISOString();
   D.meta.updatedBy = 'cloud-load';
@@ -377,6 +378,7 @@ function loadWordJarLateModules() {
     'js/wordjar-dialogs.js',
     'js/english-ui-messages.js',
     'js/ios-comfort-typography.js',
+    'js/ios-card-swipe.js',
     'js/type-consistency-fix.js',
     'js/share-card-options-complete.js',
     'js/save-performance.js',
