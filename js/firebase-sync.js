@@ -379,6 +379,7 @@ function loadWordJarLateModules() {
     'js/english-ui-messages.js',
     'js/ios-comfort-typography.js',
     'js/ios-card-swipe.js',
+    'js/ios-slide-drawer-modal.js',
     'js/type-consistency-fix.js',
     'js/share-card-options-complete.js',
     'js/save-performance.js',
