@@ -2,7 +2,7 @@
    Final visual typography layer. Scoped to .app only, no global reset. */
 
 .app {
-  --wordjar-ios-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --wordjar-ios-font: -apple-system, BlinkMacSystemFont, "SF Pro", "SF Pro Text", "SF Pro Display", "Sukhumvit Set", "Thonburi", "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
   --wordjar-body-size: clamp(0.9375rem, 0.9rem + 0.2vw, 1.0625rem);
   --wordjar-ui-size: clamp(0.875rem, 0.84rem + 0.15vw, 0.9375rem);
   --wordjar-title-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);

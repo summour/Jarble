@@ -15,7 +15,7 @@
   background: #ffffff; color: #09090b;
   border: 1px solid #e4e4e7; border-radius: 36px;
   padding: 48px;
-  font-family: var(--wordjar-ios-font, -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, system-ui, sans-serif);
+  font-family: var(--wordjar-ios-font, -apple-system, BlinkMacSystemFont, "SF Pro", "SF Pro Text", "SF Pro Display", "Sukhumvit Set", "Thonburi", "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif);
   box-shadow: none; overflow: hidden;
 }
 #shareCard.share-theme-dark { background: #09090b; color: #ffffff; border-color: #27272a; }
@@ -148,7 +148,7 @@
   background: #ffffff; color: #09090b;
   border: 1px solid #e4e4e7; border-radius: 36px;
   padding: 58px;
-  font-family: var(--wordjar-ios-font, -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, system-ui, sans-serif);
+  font-family: var(--wordjar-ios-font, -apple-system, BlinkMacSystemFont, "SF Pro", "SF Pro Text", "SF Pro Display", "Sukhumvit Set", "Thonburi", "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif);
   box-shadow: none; overflow: hidden; margin: 0;
 }
 #shareCardPreview.share-card-preview-clone.share-theme-dark { background: #09090b; color: #ffffff; border-color: #27272a; }
