@@ -47,20 +47,47 @@
   }
 
   /**
-   * Build the Study Mode list.
+   * Build the Study Mode list from custom selected word IDs or deck words.
    *
    * @param {WordJarWord[]} [words=[]]
-   * @param {{limit?: number}} [options={}]
+   * @param {{selectedIds?: (string|number)[]|Set<string|number>, deckId?: string|null, shuffle?: boolean, limit?: number}} [options={}]
    * @returns {WordJarWord[]}
    */
   function buildLearnList(words = [], options = {}) {
-    const limit = Number(options.limit || 15);
-    const withExamples = words.filter(word => WordJarUtils.normalizeText(word.example));
-    const source = withExamples.length ? withExamples : [...words];
+    let result = [];
+    if (options.selectedIds) {
+      const idSet = options.selectedIds instanceof Set
+        ? options.selectedIds
+        : new Set((options.selectedIds || []).map(id => String(id)));
 
-    return [...source]
-      .sort(() => Math.random() - 0.5)
-      .slice(0, limit);
+      result = words.filter(w => idSet.has(String(w.id)));
+    } else if (options.deckId) {
+      result = words.filter(w => WordJarUtils.normalizeId(w.deckId) === WordJarUtils.normalizeId(options.deckId));
+    } else {
+      result = [...words];
+    }
+
+    if (options.shuffle !== false) {
+      result = [...result].sort(() => Math.random() - 0.5);
+    }
+
+    if (options.limit && options.limit > 0) {
+      result = result.slice(0, Number(options.limit));
+    }
+
+    return result;
+  }
+
+  /**
+   * Get words belonging to a deck (or all words if deckId is null/empty).
+   *
+   * @param {WordJarWord[]} [words=[]]
+   * @param {?string} [deckId=null]
+   * @returns {WordJarWord[]}
+   */
+  function getWordsForDeck(words = [], deckId = null) {
+    if (!deckId) return [...words];
+    return words.filter(w => WordJarUtils.normalizeId(w.deckId) === WordJarUtils.normalizeId(deckId));
   }
 
   /**
@@ -107,6 +134,7 @@
     getFlashcardQueue,
     getFlashcardStats,
     buildLearnList,
+    getWordsForDeck,
     markStudied,
     calculateStreak
   };

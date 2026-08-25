@@ -611,31 +611,55 @@ function rateFC(q) {
   save(); fcI++; renderFC();
 }
 
-// LEARN MODE
-function startLearn() {
-  lList = [...D.words].filter(w => w.example).sort(() => Math.random()-.5).slice(0, 15);
-  if (!lList.length) lList = [...D.words].sort(() => Math.random()-.5).slice(0, 15);
-  if (!lList.length) { toast('Add some words first!'); return; }
-  lI = 0; nav('learn'); renderLearn();
+// LEARN / STUDY MODE (Delegates to WordJar Study UI)
+function startLearn(deckId = null) {
+  if (typeof window.openStudyDeckPicker === 'function' && !deckId) {
+    window.openStudyDeckPicker();
+  } else if (typeof window.openStudyWordSelect === 'function' && deckId) {
+    window.openStudyWordSelect(deckId);
+  } else {
+    lList = [...D.words].filter(w => !deckId || String(w.deckId) === String(deckId));
+    if (!lList.length) { toast('Add some words first!'); return; }
+    lI = 0; nav('learn'); renderLearn();
+  }
 }
 function renderLearn() {
+  if (typeof window.renderLearn === 'function' && window.renderLearn !== renderLearn) {
+    window.renderLearn();
+    return;
+  }
   const done = document.getElementById('lDone'), main = document.getElementById('lMain');
-  if (lI >= lList.length) { main.style.display='none'; done.style.display='flex'; return; }
-  main.style.display='flex'; done.style.display='none';
+  if (!Array.isArray(lList) || !lList.length || lI >= lList.length) {
+    if (main) main.style.display='none';
+    if (done) done.style.display='flex';
+    return;
+  }
+  if (main) main.style.display='flex';
+  if (done) done.style.display='none';
   const w = lList[lI];
-  document.getElementById('lCnt').textContent = `${lI+1} / ${lList.length}`;
-  const s = (w.example||`"${w.word}" is used in context.`).replace(new RegExp('\\b'+w.word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','gi'), m => `<span class="hl">${m}</span>`);
-  document.getElementById('lSentence').innerHTML = `"${s}"`;
-  document.getElementById('lWord').textContent = w.word;
-  document.getElementById('lPron').textContent = w.pronunciation || '';
-  document.getElementById('lMeaning').textContent = w.meaning;
+  const cntEl = document.getElementById('lCnt');
+  if (cntEl) cntEl.textContent = `Word ${lI+1} of ${lList.length}`;
+  const s = (w.example||`"${w.word}" is used in context.`).replace(new RegExp('\\b'+(w.word || '').replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','gi'), m => `<span class="hl">${m}</span>`);
+  const sentEl = document.getElementById('lSentence');
+  if (sentEl) sentEl.innerHTML = `"${s}"`;
+  const wordEl = document.getElementById('lWord');
+  if (wordEl) wordEl.textContent = w.word;
+  const pronEl = document.getElementById('lPron');
+  if (pronEl) pronEl.textContent = w.pronunciation ? `/${w.pronunciation}/` : '';
+  const meanEl = document.getElementById('lMeaning');
+  if (meanEl) meanEl.textContent = w.meaning;
   const typeDisplay = (w.type || 'N').split(',')[0].toUpperCase();
-  document.getElementById('lTags').innerHTML = `<div class="tag-pill">${typeDisplay}</div>`;
+  const tagsEl = document.getElementById('lTags');
+  if (tagsEl) tagsEl.innerHTML = `<div class="tag-pill">${typeDisplay}</div>`;
   const btnEx = document.getElementById('lPlayEx');
-  btnEx.style.display = w.example ? 'flex' : 'none';
-  if(D.profile.autoPlay) setTimeout(() => speak(w.word), 150);
+  if (btnEx) btnEx.style.display = w.example ? 'flex' : 'none';
+  if(D.profile.autoPlay && typeof speak === 'function') setTimeout(() => speak(w.word), 150);
 }
 function nextLearn() {
+  if (typeof window.nextLearn === 'function' && window.nextLearn !== nextLearn) {
+    window.nextLearn();
+    return;
+  }
   D.todayDone++;
   markStudied();
   save();

@@ -7,7 +7,7 @@ function toast(msg) { const t = document.getElementById('toast'); t.textContent 
 // navigation
 function nav(p) {
   pageIds.forEach(id => { const el=document.getElementById('pg-'+id); if(el) el.classList.remove('active'); });
-  ['fc','learn','deck-overview','deck-cards'].forEach(id => { const el=document.getElementById('pg-'+id); if(el) el.classList.remove('active'); });
+  ['fc','learn','deck-overview','deck-cards','study-deck-select','study-word-select'].forEach(id => { const el=document.getElementById('pg-'+id); if(el) el.classList.remove('active'); });
   document.querySelectorAll('.top-btn').forEach(n => n.classList.remove('active'));
   
   const el = document.getElementById('pg-'+p);
@@ -16,7 +16,7 @@ function nav(p) {
   if (tb) tb.classList.add('active'); else document.getElementById('tb-home').classList.add('active');
 
   const header = document.getElementById('mainHeader');
-  if(p === 'fc' || p === 'learn' || p === 'deck-overview' || p === 'deck-cards') { header.style.display = 'none'; } else { header.style.display = 'flex'; }
+  if(p === 'fc' || p === 'learn' || p === 'deck-overview' || p === 'deck-cards' || p === 'study-deck-select' || p === 'study-word-select') { header.style.display = 'none'; } else { header.style.display = 'flex'; }
   
   curPage = p;
   if (p==='home') updateHome();

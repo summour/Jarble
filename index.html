@@ -108,8 +108,74 @@ try {
   </div>
 
   <div style="padding: 0 20px 30px; margin-top:auto; display:flex; flex-direction:column; gap:10px;">
-    <button class="btn btn-p btn-full" style="padding: 14px; font-size: 15px; border-radius: 14px;" onclick="startDeckSession()">Study Now</button>
+    <button class="btn btn-p btn-full" style="padding: 14px; font-size: 15px; border-radius: 14px;" onclick="openStudyWordSelect(currentStudyDeckId)">Study Mode (Recite)</button>
+    <button class="btn btn-s btn-full" style="padding: 12px; font-size: 14px; border-radius: 14px;" onclick="startDeckSession()">Flashcards (Test)</button>
     <button class="btn btn-s btn-full" style="padding: 12px; font-size: 14px; border-radius: 14px;" onclick="openDeckOptionsModal(currentStudyDeckId)">Learning Settings</button>
+  </div>
+</div>
+
+<div class="study-page" id="pg-study-deck-select" style="overflow-y:auto; background:var(--bg);">
+  <div class="topbar">
+    <button class="back-btn" onclick="nav('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <div style="flex:1; font-weight:700; font-size:16px; text-align:center;">Study Mode</div>
+    <div style="width:36px;"></div>
+  </div>
+
+  <div style="padding: 16px 20px 8px;">
+    <div style="font-size:22px; font-weight:700; color:var(--ink); letter-spacing:-0.4px;">Select Deck to Recite</div>
+    <div style="font-size:13px; color:var(--ink2); margin-top:4px;">Choose a deck to select specific words for memorization</div>
+  </div>
+
+  <div id="studyDeckList" style="padding: 12px 20px 24px; display:flex; flex-direction:column; gap:12px;"></div>
+</div>
+
+<div class="study-page" id="pg-study-word-select" style="overflow-y:auto; background:var(--bg);">
+  <div class="topbar">
+    <button class="back-btn" onclick="backFromStudyWordSelect()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></button>
+    <div style="flex:1; font-weight:700; font-size:16px; text-align:center;" id="studyWordSelectDeckTitle">Select Words</div>
+    <div style="width:36px;"></div>
+  </div>
+
+  <div style="padding: 14px 20px 8px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+      <div>
+        <div style="font-size:20px; font-weight:700; color:var(--ink);" id="studyWordSelectHeader">Pick Words to Recite</div>
+        <div style="font-size:13px; color:var(--ink2);" id="studyWordSelectSub">Select specific words to memorize</div>
+      </div>
+      <div id="studySelectedBadge" style="font-size:12px; font-weight:800; color:var(--ink); background:var(--sur2); border:1px solid var(--bdr); border-radius:999px; padding:6px 14px; white-space:nowrap; flex-shrink:0;">
+        0 selected
+      </div>
+    </div>
+  </div>
+
+  <div style="padding: 6px 20px 10px; display:flex; flex-direction:column; gap:10px;">
+    <div class="sw">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/>
+        <path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input class="si" id="studyWordSearch" type="text" placeholder="Search words in this deck..." oninput="renderStudyWordSelectList()">
+    </div>
+    <div style="display:flex; gap:8px; align-items:center; justify-content:space-between; flex-wrap:wrap;">
+      <div style="display:flex; gap:6px;">
+        <button type="button" class="btn btn-s" style="padding:6px 14px; font-size:12px; border-radius:10px;" onclick="studySelectAllWords(true)">Select All</button>
+        <button type="button" class="btn btn-s" style="padding:6px 14px; font-size:12px; border-radius:10px;" onclick="studySelectAllWords(false)">Clear</button>
+      </div>
+      <label style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:var(--ink2); cursor:pointer; user-select:none;">
+        <input type="checkbox" id="studyShuffleToggle" style="accent-color:var(--ink); width:16px; height:16px;" checked>
+        Shuffle order
+      </label>
+    </div>
+  </div>
+
+  <div id="studyWordSelectList" class="word-list" style="padding-top:6px; padding-bottom:120px;"></div>
+
+  <div class="select-action-bar" style="display:block;">
+    <div class="select-action-panel" style="max-width:440px;">
+      <button id="btnStartRecite" class="btn btn-p btn-full" style="padding:15px; font-size:15px; border-radius:16px;" type="button" onclick="startRecitingSelectedWords()">
+        Start Reciting (0 words)
+      </button>
+    </div>
   </div>
 </div>
 
@@ -244,41 +310,73 @@ try {
 
 <div class="study-page" id="pg-learn">
   <div class="fc-topbar">
-    <button class="fc-close-btn" onclick="nav('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    <div id="lCnt" style="font-weight:700; font-size:15px;">0 / 0</div>
-    <div style="width: 36px;"></div>
+    <button class="fc-close-btn" onclick="confirmExitStudy()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <div id="lCnt" style="font-weight:700; font-size:15px; letter-spacing:0.2px;">Word 0 of 0</div>
+    <button class="ib" type="button" onclick="toggleStudyAudioAutoPlay()" title="Toggle Auto Pronounce" id="btnStudyAutoPlay" style="width:34px; height:34px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+    </button>
   </div>
 
   <div id="lMain" style="flex:1; display:flex; flex-direction:column; min-height:0;">
     <div class="fc-scene">
       <div class="fc-card-inner" style="cursor:default;">
         <div class="fc-card-front" style="overflow-y:auto; justify-content:flex-start; text-align:left; padding:24px;">
-          <div class="fc-word-b" id="lWord">Word</div>
-          <div class="fc-pron-b" id="lPron">/pron/</div>
-          <div class="tag-row back" id="lTags"></div>
-          <div class="ans-label">Meaning:</div>
-          <div class="fc-meaning" id="lMeaning"></div>
-          <div class="ans-label">Example:</div>
-          <div class="fc-ex" id="lSentence"></div>
-          <div style="flex:1"></div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap:8px;">
+            <div class="tag-row back" id="lTags" style="margin-bottom:0;"></div>
+            <div id="lDeckBadge" style="font-size:11px; font-weight:700; padding:4px 10px; border-radius:8px; background:var(--sur2); color:var(--ink2); border:1px solid var(--bdr); white-space:nowrap;"></div>
+          </div>
+
+          <div class="fc-word-b" id="lWord" style="font-size:32px; line-height:1.2; margin-bottom:4px; font-weight:800;">Word</div>
+          <div class="fc-pron-b" id="lPron" style="font-size:15px; margin-bottom:16px;">/pron/</div>
+          
+          <div class="ans-label" style="margin-bottom:4px;">Meaning:</div>
+          <div class="fc-meaning" id="lMeaning" style="font-size:16px; line-height:1.55; margin-bottom:16px;"></div>
+
+          <div id="lExWrap" style="margin-bottom:16px;">
+            <div class="ans-label" style="margin-bottom:4px;">Example:</div>
+            <div class="fc-ex" id="lSentence" style="font-size:15px; line-height:1.55; margin-bottom:0;"></div>
+          </div>
+
+          <div id="lNotesWrap" style="display:none; margin-bottom:16px;">
+            <div class="ans-label" style="margin-bottom:4px;">Notes:</div>
+            <div class="fc-nt" id="lNotes" style="font-size:14px; margin-bottom:0;"></div>
+          </div>
+
+          <div style="flex:1; min-height:16px;"></div>
+
           <div class="card-tts-row">
-            <button class="tts-action-btn" onclick="playLearnWord(event)">Listen</button>
-            <button class="tts-action-btn" id="lPlayEx" style="display:none" onclick="playLearnEx(event)">Example</button>
+            <button class="tts-action-btn" onclick="playLearnWord(event)">Listen Word</button>
+            <button class="tts-action-btn" id="lPlayEx" style="display:none" onclick="playLearnEx(event)">Listen Example</button>
           </div>
         </div>
       </div>
     </div>
-    <div class="fc-action-area" style="min-height: 80px;">
-      <button class="btn btn-p btn-full" style="padding: 14px; font-size:15px; border-radius:14px;" onclick="nextLearn()">Mark as Learned</button>
+
+    <div class="fc-action-area" style="min-height: 80px; padding: 10px 20px 20px;">
+      <div style="display:grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.6fr); gap:10px; width:100%;">
+        <button id="btnPrevLearn" class="btn btn-s" type="button" onclick="prevLearn()" style="padding:14px 8px; font-size:14px; border-radius:14px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px;height:16px;"><polyline points="15 18 9 12 15 6"/></svg> Prev
+        </button>
+        <button id="btnSkipLearn" class="btn btn-s" type="button" onclick="skipLearn()" style="padding:14px 8px; font-size:14px; border-radius:14px;">
+          Next <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px;height:16px;"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button id="btnMarkLearned" class="btn btn-p" type="button" onclick="nextLearn()" style="padding:14px 8px; font-size:15px; border-radius:14px;">
+          Learned ✓
+        </button>
+      </div>
     </div>
   </div>
 
-  <div id="lDone" style="display:none; flex:1; flex-direction:column;">
-    <div class="empty">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253"/></svg>
-      <div class="empty-title">All Done</div>
-      <div class="empty-sub">You reviewed all words in this session.</div>
-      <button class="btn btn-p" style="width:auto;padding:12px 24px; margin-top:12px;" onclick="nav('home')">Back to Home</button>
+  <div id="lDone" style="display:none; flex:1; flex-direction:column; justify-content:center; align-items:center; padding:20px;">
+    <div class="empty" style="width:100%; max-width:360px; padding:20px 10px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="width:56px;height:56px;color:var(--ac);margin-bottom:16px;"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253"/></svg>
+      <div class="empty-title" style="font-size:22px; margin-bottom:6px;">Recitation Complete!</div>
+      <div class="empty-sub" id="lDoneStats" style="font-size:14px; margin-bottom:24px; line-height:1.5;">You finished reciting this selection of vocabulary words.</div>
+      <div style="display:flex; flex-direction:column; gap:10px; width:100%;">
+        <button class="btn btn-p btn-full" style="padding:14px; font-size:15px; border-radius:14px;" onclick="restartCurrentStudySession()">Recite Again</button>
+        <button class="btn btn-s btn-full" style="padding:12px; font-size:14px; border-radius:14px;" onclick="openStudyWordSelect(currentStudyDeckId)">Choose Different Words</button>
+        <button class="btn btn-s btn-full" style="padding:12px; font-size:14px; border-radius:14px;" onclick="nav('home')">Back to Dashboard</button>
+      </div>
     </div>
   </div>
 </div>
@@ -880,6 +978,8 @@ try {
 <script src="js/storage.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/autofill.js"></script>
+<script src="js/study-ui.js"></script>
+<script src="js/ios-drag-select.js"></script>
 <script src="js/share-card.js"></script>
 <script src="js/firebase-sync.js"></script>
 <script src="js/app.js"></script>
