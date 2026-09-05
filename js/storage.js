@@ -280,10 +280,36 @@ function askDuplicateImportChoice(count, deckName) {
 async function processCSV(text) {
   try {
     const lines = String(text || '').split(/\r?\n/);
-    const targetDeck = importTargetDeckId || D.decks[0]?.id || SYSTEM_NO_DECK_ID;
-    const targetDeckName = isSystemNoDeckId(targetDeck)
-      ? SYSTEM_NO_DECK_NAME
-      : (D.decks.find(d => String(d.id) === String(targetDeck))?.name || SYSTEM_NO_DECK_NAME);
+    const selectedDeckId = importTargetDeckId || null;
+    const defaultDeckId = D.decks[0]?.id || SYSTEM_NO_DECK_ID;
+    const decksByName = new Map(
+      D.decks.map(deck => [String(deck.name || '').trim().toLocaleLowerCase(), deck])
+    );
+    const newDecks = [];
+
+    function getRowDeckId(cols) {
+      if (selectedDeckId) return selectedDeckId;
+
+      const name = String(cols[6] || '').trim();
+      if (!name || name.toLocaleLowerCase() === SYSTEM_NO_DECK_NAME.toLocaleLowerCase()) {
+        return defaultDeckId;
+      }
+
+      const key = name.toLocaleLowerCase();
+      const existing = decksByName.get(key);
+      if (existing) return existing.id;
+
+      const deck = {
+        id: 'd' + Date.now() + '-' + (D.decks.length + newDecks.length + 1) + '-' + Math.random().toString(36).slice(2, 6),
+        name,
+        desc: '',
+        color: '#09090b',
+        options: defaultDeckOptions()
+      };
+      decksByName.set(key, deck);
+      newDecks.push(deck);
+      return deck.id;
+    }
 
     const importable = [];
     const duplicateSameDeck = [];
@@ -294,16 +320,17 @@ async function processCSV(text) {
       if (!line) continue;
 
       const cols = parseCSVLine(line);
-      const item = makeImportedWord(cols, targetDeck, i);
-      if (!item) {
+      if (!String(cols[0] || '').trim() || cols.length < 4) {
         invalidCount++;
         continue;
       }
 
+      const targetDeckId = getRowDeckId(cols);
+      const item = makeImportedWord(cols, targetDeckId, i);
       const lowerWord = item.word.toLowerCase().trim();
       const existsInTargetDeck = D.words.some(w =>
         String(w.word || '').toLowerCase().trim() === lowerWord &&
-        String(w.deckId || '') === String(targetDeck || '')
+        String(w.deckId || '') === String(targetDeckId)
       );
 
       if (existsInTargetDeck) duplicateSameDeck.push(item);
@@ -314,7 +341,10 @@ async function processCSV(text) {
     let skippedDuplicateCount = 0;
 
     if (duplicateSameDeck.length > 0) {
-      const includeDupes = await askDuplicateImportChoice(duplicateSameDeck.length, targetDeckName);
+      const destination = selectedDeckId
+        ? (D.decks.find(d => String(d.id) === String(selectedDeckId))?.name || SYSTEM_NO_DECK_NAME)
+        : 'their matching decks';
+      const includeDupes = await askDuplicateImportChoice(duplicateSameDeck.length, destination);
       if (includeDupes) finalImport = finalImport.concat(duplicateSameDeck);
       else skippedDuplicateCount = duplicateSameDeck.length;
     }
@@ -324,20 +354,27 @@ async function processCSV(text) {
       return;
     }
 
-    const skipped = skippedDuplicateCount ? `\nSkipped ${skippedDuplicateCount} duplicates already in this deck.` : '';
+    const created = newDecks.length ? `\nCreated ${newDecks.length} deck${newDecks.length === 1 ? '' : 's'} from the CSV.` : '';
+    const skipped = skippedDuplicateCount ? `\nSkipped ${skippedDuplicateCount} duplicates already in their matching decks.` : '';
     const invalid = invalidCount ? `\nIgnored ${invalidCount} invalid rows.` : '';
+    const destination = selectedDeckId
+      ? `to "${D.decks.find(d => String(d.id) === String(selectedDeckId))?.name || SYSTEM_NO_DECK_NAME}"`
+      : 'and restore their matching decks';
 
-    if (confirm(`Import ${finalImport.length} words to "${targetDeckName}"?${skipped}${invalid}`)) {
+    if (confirm(`Import ${finalImport.length} words ${destination}?${created}${skipped}${invalid}`)) {
+      D.decks = [...D.decks, ...newDecks];
       D.words = [...D.words, ...finalImport];
+      normalizeWordDeckIds();
       save();
       updateHome();
       renderWords();
       renderDecks();
       if (currentStudyDeckId && (isSystemNoDeckId(currentStudyDeckId) || D.decks.some(d => String(d.id) === String(currentStudyDeckId)))) showDeckOverview(currentStudyDeckId);
       if (curPage === 'deck-cards') renderDeckCards();
-      toast('Imported successfully!');
+      toast(`Imported ${finalImport.length} words${newDecks.length ? ` and ${newDecks.length} decks` : ''}!`);
     }
   } catch(err) {
+    console.error('CSV import failed:', err);
     toast('Import failed');
   }
 
