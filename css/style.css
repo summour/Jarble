@@ -2,7 +2,7 @@
    MAIN ENTRY — WordJar modular CSS
 
    index.html loads this file directly.
-   Load order matters: base → components → layout → pages → deck-cards → flashcard → modals → share → fixes → theme → popup width → black accent → background tuning → feature modules → final iOS type scale → responsive web → compact top nav → Mushy unified header → Mushy chat background → detail actions fix → bottom dock
+   Load order: base components, feature styles, legacy compatibility, then jarble-design.css.
    ═══════════════════════════════════════════ */
 
 @import url('base.css');
@@ -21,7 +21,7 @@
 @import url('wordjar-app-center-fix.css');
 @import url('wordjar-ios-font-system.css');
 @import url('wordjar-responsive-web.css');
-@import url('wordjar-top-nav-compact.css');
+
 @import url('wordjar-detail-actions-fix.css');
 @import url('wordjar-deck-options-center.css');
-@import url('wordjar-bottom-dock.css');
+@import url('jarble-design.css');

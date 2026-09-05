@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-sca
-le=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Jarble</title>
 <link rel="icon" href="assets/brand/logo.png" type="image/png">
 <link rel="apple-touch-icon" href="assets/brand/logo.png">
@@ -54,28 +53,49 @@ try {
 
 <div class="main-header" id="mainHeader">
   <div class="brand">Jarble</div>
-  <div class="top-nav">
-    <button class="top-btn active" id="tb-home" onclick="nav('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button>
-    <button class="top-btn" id="tb-decks" onclick="nav('decks')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg></button>
-    <button class="top-btn" id="tb-words" onclick="nav('words')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button>
-    <button class="top-btn" id="tb-account" onclick="nav('account')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
-  </div>
+  <nav class="top-nav" aria-label="Main navigation">
+    <button class="top-btn active" id="tb-home" aria-label="Home" onclick="nav('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="nav-label">Home</span></button>
+    <button class="top-btn" id="tb-decks" aria-label="Decks" onclick="nav('decks')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg><span class="nav-label">Decks</span></button>
+    <button class="top-btn" id="tb-words" aria-label="Dictionary" onclick="nav('words')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span class="nav-label">Dictionary</span></button>
+    <button class="top-btn" id="tb-account" aria-label="Settings" onclick="nav('account')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span class="nav-label">Settings</span></button>
+  </nav>
 </div>
 
 <div class="page active" id="pg-home">
-  <div class="home-hero"><div class="home-title">Dashboard</div></div>
+  <section class="home-hero" aria-labelledby="homeTitle">
+    <div class="hero-copy">
+      <p class="hero-eyebrow">Your daily word journey</p>
+      <h1 class="home-title" id="homeTitle">Small steps.<br>More words.</h1>
+      <p class="hero-description">Make room for a little learning. Build your vocabulary, one card at a time.</p>
+      <div class="hero-actions">
+        <button class="btn btn-p" onclick="openStudyDeckPicker()">Start studying <span aria-hidden="true">↗</span></button>
+        <button class="btn btn-s" onclick="nav('decks')">Explore decks</button>
+      </div>
+    </div>
+    <div class="hero-visual" aria-label="A vocabulary card for the word serendipity">
+      <div class="vocab-card">
+        <div class="vocab-meta">A little discovery <span aria-hidden="true">↗</span></div>
+        <div class="vocab-word">serendipity</div>
+        <div class="vocab-type">noun · /ˌser.ənˈdɪp.ə.ti/</div>
+        <p>The joy of finding something good when you least expect it.</p>
+        <div class="vocab-bottom"><span>Keep discovering.</span><img src="assets/avatars/BunnyIdle.gif" alt="" width="64" height="64"></div>
+      </div>
+    </div>
+  </section>
+  <div class="progress-heading"><h2>Your momentum</h2><span>A little, every day.</span></div>
   <div class="calendar-strip" id="weekCalendar"></div>
   <div class="plan-card">
     <div class="ring-wrap">
       <svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="32" fill="none" stroke="var(--sur2)" stroke-width="8"/><circle id="ringC" cx="40" cy="40" r="32" fill="none" stroke="var(--ac)" stroke-width="8" stroke-linecap="round" stroke-dasharray="201.06" stroke-dashoffset="201.06" transform="rotate(-90 40 40)" style="transition:stroke-dashoffset .8s ease"/></svg>
-      <div class="ring-center"><div class="ring-pct" id="ringPct">0%</div><div class="ring-sub">TODAY</div></div>
+      <div class="ring-center"><div class="ring-pct" id="ringPct">0%</div><div class="ring-sub">Today</div></div>
     </div>
     <div class="plan-stats">
       <div class="psr"><div class="psl">Words Reviewed</div><div class="psv" id="hDone">0</div></div>
       <div class="psr"><div class="psl">Total Library</div><div class="psv" id="hTotal">0</div></div>
     </div>
   </div>
-  <div class="streak-strip"><div class="streak-lbl">Study Streak</div><div class="streak-val" id="hStreak">0</div></div>
+  <div class="streak-strip"><div><div class="streak-lbl">Study streak</div><p class="streak-note">Show up. Keep growing.</p></div><div><span class="streak-val" id="hStreak">0</span><span class="streak-unit"> days</span></div></div>
+  <footer class="home-footer"><div><strong>Jarble</strong><p>A home for every new word.</p></div><button class="btn btn-s" onclick="nav('words')">Open dictionary <span aria-hidden="true">↗</span></button></footer>
 </div>
 
 <div class="page" id="pg-decks">
