@@ -131,7 +131,7 @@
     if (document.getElementById('studyAutoRunStyle')) return;
     const style = document.createElement('style');
     style.id = 'studyAutoRunStyle';
-    style.textContent = '#studyAutoRunSettings .auto-run-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 0;border-top:1px solid var(--bdr)}#studyAutoRunSettings .auto-run-title{font-size:14px;font-weight:700;color:var(--ink)}#studyAutoRunSettings .auto-run-desc{font-size:12px;color:var(--ink2);line-height:1.35;margin-top:3px}#studyAutoRunSettings select{min-width:92px;padding:8px;border:1px solid var(--bdr);border-radius:10px;background:var(--sur2);color:var(--ink)}';
+    style.textContent = '.auto-run-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 0;border-top:1px solid var(--bdr)}.auto-run-row:first-child{border-top:0;padding-top:2px}.auto-run-title{font-size:14px;font-weight:700;color:var(--ink)}.auto-run-desc{font-size:12px;color:var(--ink2);line-height:1.35;margin-top:3px}.auto-run-row select{min-width:92px;padding:8px;border:1px solid var(--bdr);border-radius:10px;background:var(--sur2);color:var(--ink)}';
     document.head.appendChild(style);
   }
 
@@ -139,17 +139,32 @@
     return '<div class="auto-run-row"><div><div class="auto-run-title">' + title + '</div><div class="auto-run-desc">' + description + '</div></div><label class="switch"><input type="checkbox" data-auto-run="' + key + '"><span class="slider"></span></label></div>';
   }
 
-  function ensureSettingsPanel() {
-    const account = document.getElementById('pg-account');
-    if (!account || document.getElementById('studyAutoRunSettings')) return;
-    addStyle();
+  function ensureSettingsModal() {
+    let modal = document.getElementById('studyAutoRunModal');
+    if (modal) return modal;
 
-    const panel = document.createElement('div');
-    panel.className = 'settings-card';
-    panel.id = 'studyAutoRunSettings';
-    panel.innerHTML =
-      '<div class="settings-card-title">Study Auto Run</div>' +
-      '<div class="format-label" style="margin-bottom:10px">Speaks selected fields and moves through cards automatically while Jarble is open. Mobile systems may pause web audio when the screen is locked.</div>' +
+    modal = document.createElement('div');
+    modal.id = 'studyAutoRunModal';
+    modal.className = 'overlay';
+    modal.addEventListener('click', event => {
+      if (event.target === modal) closeO('studyAutoRunModal');
+    });
+    modal.innerHTML =
+      '<div class="modal-card" onclick="event.stopPropagation()">' +
+        '<div class="modal-header" style="margin-bottom:14px"><div><div class="sh-title">Study Auto Run</div><div class="modal-subtitle" style="margin-top:4px;color:var(--ink2);font-size:13px;line-height:1.4">Choose what Jarble reads and when it changes to the next word.</div></div>' +
+        '<button class="btn-close" type="button" onclick="closeO(\'studyAutoRunModal\')" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>' +
+        '<div class="settings-inline-note">Auto Run works while Jarble is open. Mobile systems may pause web audio after the screen is locked.</div>' +
+        '<div id="studyAutoRunModalBody"></div>' +
+      '</div>';
+    document.body.appendChild(modal);
+    return modal;
+  }
+
+  function renderSettingsModal() {
+    const body = document.getElementById('studyAutoRunModalBody');
+    if (!body) return;
+    const config = settings();
+    body.innerHTML =
       checkboxRow('autoStart', 'Start automatically', 'Begin Auto Run when a Recite session starts.') +
       checkboxRow('speakWord', 'Speak word', 'Read the vocabulary word.') +
       checkboxRow('speakMeaning', 'Speak meaning', 'Read the meaning or translation.') +
@@ -158,20 +173,33 @@
       '<div class="auto-run-row"><div><div class="auto-run-title">Time before next card</div><div class="auto-run-desc">Silence after the final spoken item.</div></div><select data-auto-run="advanceMs"><option value="800">0.8 sec</option><option value="1200">1.2 sec</option><option value="1800">1.8 sec</option><option value="3000">3 sec</option><option value="5000">5 sec</option><option value="8000">8 sec</option></select></div>' +
       checkboxRow('loop', 'Loop session', 'Restart from the first word after the final card.');
 
-    const cloud = document.getElementById('cloudSyncPanel');
-    if (cloud) account.insertBefore(panel, cloud);
-    else account.appendChild(panel);
-
-    const config = settings();
-    panel.querySelectorAll('[data-auto-run]').forEach(input => {
+    body.querySelectorAll('[data-auto-run]').forEach(input => {
       const key = input.dataset.autoRun;
       if (input.type === 'checkbox') input.checked = Boolean(config[key]);
       else input.value = String(config[key]);
-      input.addEventListener('change', () => {
+      input.onchange = () => {
         config[key] = input.type === 'checkbox' ? input.checked : Number(input.value);
         saveSettings();
-      });
+      };
     });
+  }
+
+  window.openStudyAutoRunModal = function openStudyAutoRunModal() {
+    addStyle();
+    ensureSettingsModal();
+    renderSettingsModal();
+    openO('studyAutoRunModal');
+  };
+
+  function injectSettingsRow() {
+    const menu = document.querySelector('#pg-account .menu-sec');
+    if (!menu || document.getElementById('studyAutoRunSettingsRow')) return;
+    const row = document.createElement('div');
+    row.className = 'mr';
+    row.id = 'studyAutoRunSettingsRow';
+    row.onclick = () => window.openStudyAutoRunModal();
+    row.innerHTML = '<div class="ml">Study Auto Run</div><div class="ma"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 18l6-6-6-6"/></svg></div>';
+    menu.appendChild(row);
   }
 
   window.toggleStudyAutoRun = function toggleStudyAutoRun() {
@@ -210,13 +238,14 @@
   const previousUpdateAccount = window.updateAccount;
   window.updateAccount = function updateAccountWithAutoRunSettings() {
     previousUpdateAccount?.apply(this, arguments);
-    ensureSettingsPanel();
+    injectSettingsRow();
   };
 
-  document.addEventListener('click', () => setTimeout(ensureSettingsPanel, 0), true);
+  document.addEventListener('click', () => setTimeout(injectSettingsRow, 0), true);
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState !== 'visible') window.speechSynthesis?.cancel();
   });
   window.addEventListener('pagehide', () => clearRun());
-  setTimeout(ensureSettingsPanel, 0);
+  addStyle();
+  setTimeout(injectSettingsRow, 0);
 })();
