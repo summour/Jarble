@@ -416,7 +416,8 @@ function loadWordJarLateModules() {
   const idleModules = [
     'js/word-form-enhancements.js',
     'js/storage-health.js',
-    'js/study-ui.js'
+    'js/study-ui.js',
+    'js/study-auto-run.js'
   ];
 
   loadModulesSequentially(startupModules)
