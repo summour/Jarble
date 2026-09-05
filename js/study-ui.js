@@ -35,12 +35,14 @@
         pointer-events: auto !important;
       }
 
-      #pg-learn #lMain .fc-card-inner {
+      #pg-learn #lMain .fc-card-inner,
+      #pg-fc #fcCardInner {
         touch-action: pan-y;
         will-change: transform, opacity;
       }
 
-      #pg-learn #lMain .fc-card-inner.study-swipe-active {
+      #pg-learn #lMain .fc-card-inner.study-swipe-active,
+      #pg-fc #fcCardInner.flashcard-swipe-active {
         cursor: grabbing !important;
       }
 
@@ -161,6 +163,93 @@
     button.addEventListener('click', event => handleControlTap(event, fn), { passive: false });
   }
 
+  let flashcardSwipeStart = null;
+  let flashcardSwipeAnimating = false;
+
+  function resetFlashcardSwipe(card = document.getElementById('fcCardInner')) {
+    if (!card) return;
+    card.classList.remove('flashcard-swipe-active');
+    card.style.transition = 'transform 180ms ease, opacity 180ms ease';
+    card.style.transform = '';
+    card.style.opacity = '';
+  }
+
+  function bindFlashcardSwipe() {
+    const card = document.getElementById('fcCardInner');
+    if (!card || card.dataset.flashcardSwipeBound === 'true') return;
+
+    card.dataset.flashcardSwipeBound = 'true';
+    card.setAttribute('aria-label', 'After revealing the answer, swipe left for Again or right for Good');
+
+    card.addEventListener('pointerdown', event => {
+      if (flashcardSwipeAnimating || event.pointerType === 'mouse' || event.target.closest('button, input, textarea, select, a')) return;
+      flashcardSwipeStart = { x: event.clientX, y: event.clientY, pointerId: event.pointerId, active: false };
+      card.style.transition = 'none';
+      card.setPointerCapture?.(event.pointerId);
+    });
+
+    card.addEventListener('pointermove', event => {
+      if (!flashcardSwipeStart || event.pointerId !== flashcardSwipeStart.pointerId || flashcardSwipeAnimating) return;
+      const dx = event.clientX - flashcardSwipeStart.x;
+      const dy = event.clientY - flashcardSwipeStart.y;
+
+      if (!flashcardSwipeStart.active) {
+        if (Math.abs(dx) < 12) return;
+        if (Math.abs(dx) <= Math.abs(dy)) {
+          flashcardSwipeStart = null;
+          return;
+        }
+        flashcardSwipeStart.active = true;
+        card.classList.add('flashcard-swipe-active');
+      }
+
+      event.preventDefault();
+      const rotation = Math.max(-8, Math.min(8, dx / 24));
+      card.style.transform = `translateX(${dx}px) rotate(${rotation}deg)`;
+      card.style.opacity = String(Math.max(0.45, 1 - Math.abs(dx) / 520));
+    }, { passive: false });
+
+    const finishSwipe = event => {
+      if (!flashcardSwipeStart || event.pointerId !== flashcardSwipeStart.pointerId) return;
+      const dx = event.clientX - flashcardSwipeStart.x;
+      const shouldRate = flashcardSwipeStart.active && Math.abs(dx) >= 80 && card.classList.contains('flipped');
+      const rating = dx < 0 ? 0 : 4;
+      flashcardSwipeStart = null;
+
+      if (!shouldRate || flashcardSwipeAnimating) {
+        resetFlashcardSwipe(card);
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      flashcardSwipeAnimating = true;
+      card.classList.remove('flashcard-swipe-active');
+      card.style.transition = 'transform 180ms ease-out, opacity 180ms ease-out';
+      card.style.transform = `translateX(${rating === 0 ? '-120%' : '120%'}) rotate(${rating === 0 ? '-12' : '12'}deg)`;
+      card.style.opacity = '0';
+
+      setTimeout(() => {
+        safeRateFC(rating);
+        flashcardSwipeAnimating = false;
+        resetFlashcardSwipe();
+      }, 180);
+    };
+
+    card.addEventListener('pointerup', finishSwipe);
+    card.addEventListener('pointercancel', () => {
+      flashcardSwipeStart = null;
+      resetFlashcardSwipe(card);
+    });
+
+    card.addEventListener('click', event => {
+      if (flashcardSwipeAnimating) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+    }, true);
+  }
+
   function hardenFlashcardControls() {
     injectStyles();
     const actionArea = document.querySelector('#pg-fc #fcMain .fc-action-area');
@@ -187,6 +276,8 @@
       btn.removeAttribute('onclick');
       bindControl(btn, () => safeRateFC(rating));
     });
+
+    bindFlashcardSwipe();
 
     if (actionArea && actionArea.dataset.wordjarStopBound !== 'true') {
       actionArea.dataset.wordjarStopBound = 'true';
