@@ -7,6 +7,7 @@
   const DEFAULTS = {
     autoStart: false,
     speakWord: true,
+    spellWord: false,
     speakMeaning: true,
     speakExample: true,
     pauseMs: 500,
@@ -17,6 +18,15 @@
   let active = false;
   let timer = null;
   let token = 0;
+
+  // Speak letter names as words: some voices announce bare capitals as “capital I”.
+  const LETTER_NAMES = {
+    a: 'ay', b: 'bee', c: 'see', d: 'dee', e: 'ee', f: 'eff',
+    g: 'gee', h: 'aitch', i: 'eye', j: 'jay', k: 'kay', l: 'ell',
+    m: 'em', n: 'en', o: 'oh', p: 'pee', q: 'cue', r: 'ar',
+    s: 'ess', t: 'tee', u: 'you', v: 'vee', w: 'double you',
+    x: 'ex', y: 'why', z: 'zee'
+  };
 
   function settings() {
     D.settings = D.settings || {};
@@ -61,7 +71,7 @@
     utterance.rate = Number(D.profile?.voiceSpeed) || 0.95;
 
     if (piece.lang.startsWith('en') && typeof getBestVoice === 'function') {
-      const voice = getBestVoice(D.profile?.voice || 'en-US');
+      const voice = getBestVoice(piece.lang);
       if (voice) utterance.voice = voice;
     }
 
@@ -82,6 +92,17 @@
     const pieces = [];
 
     if (config.speakWord && w.word) pieces.push({ text: w.word, lang: D.profile?.voice || 'en-US' });
+    if (config.spellWord && w.word) {
+      // Separate utterances prevent speech engines from pronouncing a joined word.
+      // Spelling is always English even when the study voice is Thai or Japanese.
+      const spellingLanguage = String(D.profile?.voice || '').startsWith('en-GB') ? 'en-GB' : 'en-US';
+      for (const letter of w.word.normalize('NFC')) {
+        if (!/[\p{L}\p{N}]/u.test(letter)) continue;
+        const key = letter.toLowerCase();
+        const text = key === 'z' && spellingLanguage === 'en-GB' ? 'zed' : (LETTER_NAMES[key] || key);
+        pieces.push({ text, lang: spellingLanguage });
+      }
+    }
     if (config.speakMeaning && w.meaning) pieces.push({ text: w.meaning, lang: /[\u0E00-\u0E7F]/.test(w.meaning) ? 'th-TH' : (D.profile?.voice || 'en-US') });
     if (config.speakExample && w.example) pieces.push({ text: w.example, lang: D.profile?.voice || 'en-US' });
 
@@ -136,7 +157,7 @@
   }
 
   function checkboxRow(key, title, description) {
-    return '<div class="auto-run-row"><div><div class="auto-run-title">' + title + '</div><div class="auto-run-desc">' + description + '</div></div><label class="switch"><input type="checkbox" data-auto-run="' + key + '"><span class="slider"></span></label></div>';
+    return '<div class="auto-run-row"><div><div class="auto-run-title">' + title + '</div><div class="auto-run-desc">' + description + '</div></div><label class="switch"><input type="checkbox" aria-label="' + title + '" data-auto-run="' + key + '"><span class="slider"></span></label></div>';
   }
 
   function ensureSettingsModal() {
@@ -167,6 +188,7 @@
     body.innerHTML =
       checkboxRow('autoStart', 'Start automatically', 'Begin Auto Run when a Recite session starts.') +
       checkboxRow('speakWord', 'Speak word', 'Read the vocabulary word.') +
+      checkboxRow('spellWord', 'Spell word', 'Read each letter after the word. Can be used on its own.') +
       checkboxRow('speakMeaning', 'Speak meaning', 'Read the meaning or translation.') +
       checkboxRow('speakExample', 'Speak example', 'Read the example sentence when available.') +
       '<div class="auto-run-row"><div><div class="auto-run-title">Pause between items</div><div class="auto-run-desc">Silence after each spoken item.</div></div><select data-auto-run="pauseMs"><option value="0">None</option><option value="300">0.3 sec</option><option value="500">0.5 sec</option><option value="1000">1 sec</option><option value="1500">1.5 sec</option></select></div>' +
