@@ -35,6 +35,15 @@
         pointer-events: auto !important;
       }
 
+      #pg-learn #lMain .fc-card-inner {
+        touch-action: pan-y;
+        will-change: transform, opacity;
+      }
+
+      #pg-learn #lMain .fc-card-inner.study-swipe-active {
+        cursor: grabbing !important;
+      }
+
       #pg-fc .fc-action-area, #pg-learn .fc-action-area {
         position: relative !important;
         z-index: 30 !important;
@@ -550,6 +559,91 @@
     }
   };
 
+  let studySwipeStart = null;
+  let studySwipeAnimating = false;
+
+  function studySwipeCard() {
+    return document.querySelector('#pg-learn #lMain .fc-card-inner');
+  }
+
+  function resetStudySwipeCard(card = studySwipeCard()) {
+    if (!card) return;
+    card.classList.remove('study-swipe-active');
+    card.style.transition = 'transform 180ms ease, opacity 180ms ease';
+    card.style.transform = '';
+    card.style.opacity = '';
+    card.removeAttribute('data-swipe-direction');
+  }
+
+  function bindStudyCardSwipe() {
+    const card = studySwipeCard();
+    if (!card || card.dataset.studySwipeBound === 'true') return;
+
+    card.dataset.studySwipeBound = 'true';
+    card.setAttribute('aria-label', 'Swipe left for the next word or right for the previous word');
+
+    card.addEventListener('pointerdown', event => {
+      if (studySwipeAnimating || event.pointerType === 'mouse' || event.target.closest('button, input, textarea, select, a')) return;
+      studySwipeStart = { x: event.clientX, y: event.clientY, pointerId: event.pointerId, active: false };
+      card.style.transition = 'none';
+      card.setPointerCapture?.(event.pointerId);
+    });
+
+    card.addEventListener('pointermove', event => {
+      if (!studySwipeStart || event.pointerId !== studySwipeStart.pointerId || studySwipeAnimating) return;
+      const dx = event.clientX - studySwipeStart.x;
+      const dy = event.clientY - studySwipeStart.y;
+
+      if (!studySwipeStart.active) {
+        if (Math.abs(dx) < 12) return;
+        if (Math.abs(dx) <= Math.abs(dy)) {
+          studySwipeStart = null;
+          return;
+        }
+        studySwipeStart.active = true;
+        card.classList.add('study-swipe-active');
+      }
+
+      event.preventDefault();
+      const rotation = Math.max(-8, Math.min(8, dx / 24));
+      card.style.transform = `translateX(${dx}px) rotate(${rotation}deg)`;
+      card.style.opacity = String(Math.max(0.45, 1 - Math.abs(dx) / 520));
+      card.dataset.swipeDirection = dx < 0 ? 'next' : 'previous';
+    }, { passive: false });
+
+    const finishSwipe = event => {
+      if (!studySwipeStart || event.pointerId !== studySwipeStart.pointerId) return;
+      const dx = event.clientX - studySwipeStart.x;
+      const isHorizontalSwipe = studySwipeStart.active && Math.abs(dx) >= 80;
+      const direction = dx < 0 ? 'next' : 'previous';
+      studySwipeStart = null;
+
+      if (!isHorizontalSwipe || studySwipeAnimating || (direction === 'previous' && lI === 0)) {
+        resetStudySwipeCard(card);
+        return;
+      }
+
+      studySwipeAnimating = true;
+      card.classList.remove('study-swipe-active');
+      card.style.transition = 'transform 180ms ease-out, opacity 180ms ease-out';
+      card.style.transform = `translateX(${direction === 'next' ? '-120%' : '120%'}) rotate(${direction === 'next' ? '-12' : '12'}deg)`;
+      card.style.opacity = '0';
+
+      setTimeout(() => {
+        if (direction === 'next') window.skipLearn();
+        else window.prevLearn();
+        studySwipeAnimating = false;
+        resetStudySwipeCard();
+      }, 180);
+    };
+
+    card.addEventListener('pointerup', finishSwipe);
+    card.addEventListener('pointercancel', () => {
+      studySwipeStart = null;
+      resetStudySwipeCard(card);
+    });
+  }
+
   /**
    * Render the current recitation word in Study Mode.
    */
@@ -649,6 +743,9 @@
     if (D.profile?.autoPlay && typeof speak === 'function') {
       setTimeout(() => speak(w.word), 150);
     }
+
+    resetStudySwipeCard();
+    bindStudyCardSwipe();
   };
 
   /**
