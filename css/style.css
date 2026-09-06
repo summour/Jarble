@@ -25,3 +25,13 @@
 @import url('wordjar-detail-actions-fix.css');
 @import url('wordjar-deck-options-center.css');
 @import url('wordjar-bottom-dock.css');
+
+/* The Settings groups do not show a version row. */
+#pg-account .menu-sec::after { display: none; }
+#pg-account .menu-sec:empty { display: none; }
+
+/* These advanced controls are intentionally unavailable from Settings. */
+#pg-account #syncSettingsRow,
+#pg-account #storageHealthRow,
+#pg-account #systemDeckSettingsRow,
+#pg-account #wordjarApiKeySettingsRow { display: none !important; }
