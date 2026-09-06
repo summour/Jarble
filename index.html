@@ -385,8 +385,8 @@ try {
     </button>
     <div class="acc-name" id="accName">User</div>
 </div>
-<div class="sec-lbl">Settings</div>
-  <div class="menu-sec">
+<h2 class="sec-lbl" id="settingsProfileHeading">Profile &amp; Study</h2>
+  <div class="menu-sec" id="settingsProfileMenu" role="group" aria-labelledby="settingsProfileHeading">
     <div class="mr" onclick="openProfileModal()"><div class="ml">Edit Profile</div><div class="ma"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 18l6-6-6-6"/></svg></div></div>
     <div class="mr" onclick="openVoiceModal()"><div class="ml">Voice Settings</div><div class="ma"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 18l6-6-6-6"/></svg></div></div>
   </div>
@@ -425,7 +425,6 @@ try {
     </div>
   </div>
 </div>
-  <button class="btn btn-s btn-full" style="color:var(--anki-again); border-color:#fca5a5; background:#fef2f2; margin: 0 20px; width: calc(100% - 40px); padding: 14px; font-size: 14px;" onclick="clearAll()">Clear All Data</button>
 </div>
 
 <div class="overlay" id="deckModal">
