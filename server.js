@@ -1,5 +1,6 @@
 import express from 'express';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -49,6 +50,15 @@ app.post('/api/gemini', async (req, res) => {
   }
 });
 
+// Safe handler for optional firebase-config.js (serves file if present, or safe JS fallback if not)
+app.get('/firebase-config.js', (req, res) => {
+  const configPath = path.join(__dirname, 'firebase-config.js');
+  if (fs.existsSync(configPath)) {
+    return res.sendFile(configPath);
+  }
+  res.type('application/javascript').send('// Optional Firebase config not present - default local storage mode\n');
+});
+
 // Serve static assets from project root
 app.use(express.static(__dirname, {
   index: 'index.html',
@@ -57,6 +67,9 @@ app.use(express.static(__dirname, {
 
 // Fallback to index.html for SPA client navigation (only for non-file route requests)
 app.get('*', (req, res) => {
+  if (req.path.endsWith('.js')) {
+    return res.status(404).type('application/javascript').send('// Not Found\n');
+  }
   if (req.path.includes('.') && !req.path.endsWith('.html')) {
     return res.status(404).type('text/plain').send('Not Found');
   }

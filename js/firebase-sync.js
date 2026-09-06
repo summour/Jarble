@@ -112,7 +112,17 @@ function initCloudSync() {
   try {
     if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
     cloudAuth = firebase.auth();
-    cloudDb = firebase.firestore();
+    // Connect to specific firestore database if configured (or default)
+    if (FIREBASE_CONFIG.firestoreDatabaseId && typeof firebase.firestore === 'function') {
+      try {
+        cloudDb = firebase.app().firestore(FIREBASE_CONFIG.firestoreDatabaseId);
+      } catch (dbErr) {
+        console.warn('Could not connect to named database, falling back to default firestore:', dbErr);
+        cloudDb = firebase.firestore();
+      }
+    } else {
+      cloudDb = firebase.firestore();
+    }
 
     cloudAuth.onAuthStateChanged(async user => {
       cloudUser = user || null;
