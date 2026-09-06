@@ -42,7 +42,10 @@ function getFirebaseErrorText(err) {
     'unauthenticated': 'Google sign-in is not active. Sign out, sign in again, then retry.',
     'failed-precondition': 'Firestore database may not be created or rules are not ready in Firebase Console.',
     'unavailable': 'Firebase is temporarily unavailable or the network is offline. Retry after reconnecting.',
-    'invalid-argument': 'The backup payload contains a value Firestore cannot store. Export JSON as a fallback.'
+    'invalid-argument': 'The backup payload contains a value Firestore cannot store. Export JSON as a fallback.',
+    'auth/unauthorized-domain': `This domain is not in Firebase Authorized domains. Please add '${window.location.hostname}' in Firebase Console > Authentication > Settings > Authorized domains.`,
+    'auth/popup-closed-by-user': 'The sign-in popup was closed before completing login.',
+    'auth/popup-blocked': 'Popup was blocked by your browser. Please allow popups for this site.'
   }[code];
 
   return `${code}: ${message}${help ? ` ${help}` : ''}`;
