@@ -5,22 +5,16 @@
   if (window.__wordjarSettingsOrderInstalledV3) return;
   window.__wordjarSettingsOrderInstalledV3 = true;
 
-  const ORDER = [
-    'Edit Profile',
-    'Voice Settings',
-    'Flashcard Display',
-    'Dashboard Statistics',
-    'System Deck',
-    'Sync Settings',
-    'Storage Health'
-  ];
+  const PROFILE_STUDY = ['Edit Profile', 'Voice Settings', 'Study Auto Run',
+    'Flashcard Display', 'Dashboard Statistics', 'Calendar Settings'];
+  const HIDDEN_ROWS = new Set(['Sync Settings', 'Storage Health', 'System Deck', 'Private API Key']);
 
   function rowLabel(row) {
     return row?.querySelector?.('.ml')?.textContent?.trim() || row?.textContent?.trim() || '';
   }
 
   function orderSettingsRows() {
-    const menu = document.querySelector('#pg-account .menu-sec');
+    const menu = document.getElementById('settingsProfileMenu');
     if (!menu) return;
 
     const rows = Array.from(menu.querySelectorAll(':scope > .mr'));
