@@ -11,6 +11,7 @@
     speakMeaning: true,
     speakExample: true,
     pauseMs: 500,
+    examplePauseMs: 1000,
     advanceMs: 1800,
     loop: false
   };
@@ -19,7 +20,6 @@
   let timer = null;
   let token = 0;
 
-  // Speak letter names as words: some voices announce bare capitals as “capital I”.
   const LETTER_NAMES = {
     a: 'ay', b: 'bee', c: 'see', d: 'dee', e: 'ee', f: 'eff',
     g: 'gee', h: 'aitch', i: 'eye', j: 'jay', k: 'kay', l: 'ell',
@@ -34,9 +34,7 @@
     return D.settings.studyAutoRun;
   }
 
-  function saveSettings() {
-    if (typeof save === 'function') save();
-  }
+  function saveSettings() { if (typeof save === 'function') save(); }
 
   function clearRun() {
     token++;
@@ -47,6 +45,16 @@
 
   function isStudyVisible() {
     return curPage === 'learn' && Array.isArray(lList) && lI >= 0 && lI < lList.length;
+  }
+
+  function pauseAfterPiece(pieces, index) {
+    const current = pieces[index];
+    const next = pieces[index + 1];
+    const config = settings();
+    if (current?.kind === 'example' && next?.kind === 'example') {
+      return Math.max(0, Number(config.examplePauseMs) || 0);
+    }
+    return Math.max(0, Number(config.pauseMs) || 0);
   }
 
   function speakPieces(pieces, runToken, index = 0) {
@@ -77,11 +85,22 @@
 
     utterance.onend = () => {
       if (!active || runToken !== token) return;
-      const pause = Math.max(0, Number(settings().pauseMs) || 0);
-      timer = setTimeout(() => speakPieces(pieces, runToken, index + 1), pause);
+      timer = setTimeout(() => speakPieces(pieces, runToken, index + 1), pauseAfterPiece(pieces, index));
     };
     utterance.onerror = utterance.onend;
     window.speechSynthesis.speak(utterance);
+  }
+
+  function getExamples(w) {
+    const explicit = [w.example1, w.example2, w.example3]
+      .map(value => String(value || '').trim())
+      .filter(Boolean);
+    if (explicit.length) return explicit;
+    return String(w.example || '')
+      .split(/\r?\n|\s*\|\s*/)
+      .map(value => value.trim())
+      .filter(Boolean)
+      .slice(0, 3);
   }
 
   function runCurrentCard() {
@@ -91,20 +110,22 @@
     const config = settings();
     const pieces = [];
 
-    if (config.speakWord && w.word) pieces.push({ text: w.word, lang: D.profile?.voice || 'en-US' });
+    if (config.speakWord && w.word) pieces.push({ text: w.word, lang: D.profile?.voice || 'en-US', kind: 'word' });
     if (config.spellWord && w.word) {
-      // Separate utterances prevent speech engines from pronouncing a joined word.
-      // Spelling is always English even when the study voice is Thai or Japanese.
       const spellingLanguage = String(D.profile?.voice || '').startsWith('en-GB') ? 'en-GB' : 'en-US';
       for (const letter of w.word.normalize('NFC')) {
         if (!/[\p{L}\p{N}]/u.test(letter)) continue;
         const key = letter.toLowerCase();
         const text = key === 'z' && spellingLanguage === 'en-GB' ? 'zed' : (LETTER_NAMES[key] || key);
-        pieces.push({ text, lang: spellingLanguage });
+        pieces.push({ text, lang: spellingLanguage, kind: 'spelling' });
       }
     }
-    if (config.speakMeaning && w.meaning) pieces.push({ text: w.meaning, lang: /[\u0E00-\u0E7F]/.test(w.meaning) ? 'th-TH' : (D.profile?.voice || 'en-US') });
-    if (config.speakExample && w.example) pieces.push({ text: w.example, lang: D.profile?.voice || 'en-US' });
+    if (config.speakMeaning && w.meaning) {
+      pieces.push({ text: w.meaning, lang: /[\u0E00-\u0E7F]/.test(w.meaning) ? 'th-TH' : (D.profile?.voice || 'en-US'), kind: 'meaning' });
+    }
+    if (config.speakExample) {
+      getExamples(w).forEach(text => pieces.push({ text, lang: D.profile?.voice || 'en-US', kind: 'example' }));
+    }
 
     const runToken = token;
     if (pieces.length) speakPieces(pieces, runToken);
@@ -119,10 +140,7 @@
     active = Boolean(next);
     clearRun();
     refreshControl();
-    if (active) {
-      token++;
-      runCurrentCard();
-    }
+    if (active) { token++; runCurrentCard(); }
   }
 
   function refreshControl() {
@@ -163,13 +181,10 @@
   function ensureSettingsModal() {
     let modal = document.getElementById('studyAutoRunModal');
     if (modal) return modal;
-
     modal = document.createElement('div');
     modal.id = 'studyAutoRunModal';
     modal.className = 'overlay';
-    modal.addEventListener('click', event => {
-      if (event.target === modal) closeO('studyAutoRunModal');
-    });
+    modal.addEventListener('click', event => { if (event.target === modal) closeO('studyAutoRunModal'); });
     modal.innerHTML =
       '<div class="modal-card" onclick="event.stopPropagation()">' +
         '<div class="modal-header" style="margin-bottom:14px"><div><div class="sh-title">Study Auto Run</div><div class="modal-subtitle" style="margin-top:4px;color:var(--ink2);font-size:13px;line-height:1.4">Choose what Jarble reads and when it changes to the next word.</div></div>' +
@@ -190,8 +205,9 @@
       checkboxRow('speakWord', 'Speak word', 'Read the vocabulary word.') +
       checkboxRow('spellWord', 'Spell word', 'Read each letter after the word. Can be used on its own.') +
       checkboxRow('speakMeaning', 'Speak meaning', 'Read the meaning or translation.') +
-      checkboxRow('speakExample', 'Speak example', 'Read the example sentence when available.') +
-      '<div class="auto-run-row"><div><div class="auto-run-title">Pause between items</div><div class="auto-run-desc">Silence after each spoken item.</div></div><select data-auto-run="pauseMs"><option value="0">None</option><option value="300">0.3 sec</option><option value="500">0.5 sec</option><option value="1000">1 sec</option><option value="1500">1.5 sec</option></select></div>' +
+      checkboxRow('speakExample', 'Speak example', 'Read all example sentences when available.') +
+      '<div class="auto-run-row"><div><div class="auto-run-title">Pause between items</div><div class="auto-run-desc">Silence between word, spelling, meaning and examples.</div></div><select data-auto-run="pauseMs"><option value="0">None</option><option value="300">0.3 sec</option><option value="500">0.5 sec</option><option value="1000">1 sec</option><option value="1500">1.5 sec</option></select></div>' +
+      '<div class="auto-run-row"><div><div class="auto-run-title">Pause between examples</div><div class="auto-run-desc">Silence between Example 1, Example 2 and Example 3.</div></div><select data-auto-run="examplePauseMs"><option value="0">None</option><option value="300">0.3 sec</option><option value="500">0.5 sec</option><option value="800">0.8 sec</option><option value="1000">1 sec</option><option value="1500">1.5 sec</option><option value="2000">2 sec</option><option value="3000">3 sec</option></select></div>' +
       '<div class="auto-run-row"><div><div class="auto-run-title">Time before next card</div><div class="auto-run-desc">Silence after the final spoken item.</div></div><select data-auto-run="advanceMs"><option value="800">0.8 sec</option><option value="1200">1.2 sec</option><option value="1800">1.8 sec</option><option value="3000">3 sec</option><option value="5000">5 sec</option><option value="8000">8 sec</option></select></div>' +
       checkboxRow('loop', 'Loop session', 'Restart from the first word after the final card.');
 
@@ -207,10 +223,7 @@
   }
 
   window.openStudyAutoRunModal = function openStudyAutoRunModal() {
-    addStyle();
-    ensureSettingsModal();
-    renderSettingsModal();
-    openO('studyAutoRunModal');
+    addStyle(); ensureSettingsModal(); renderSettingsModal(); openO('studyAutoRunModal');
   };
 
   function injectSettingsRow() {
@@ -224,39 +237,28 @@
       row.onclick = () => window.openStudyAutoRunModal();
       row.innerHTML = '<div class="ml">Study Auto Run</div><div class="ma"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 18l6-6-6-6"/></svg></div>';
     }
-
-    const voiceRow = [...menu.querySelectorAll('.mr')].find(item =>
-      item.querySelector('.ml')?.textContent.trim() === 'Voice Settings'
-    );
+    const voiceRow = [...menu.querySelectorAll('.mr')].find(item => item.querySelector('.ml')?.textContent.trim() === 'Voice Settings');
     if (voiceRow) voiceRow.insertAdjacentElement('afterend', row);
     else menu.appendChild(row);
   }
 
-  window.toggleStudyAutoRun = function toggleStudyAutoRun() {
-    setActive(!active);
-  };
+  window.toggleStudyAutoRun = function toggleStudyAutoRun() { setActive(!active); };
 
   const originalRenderLearn = window.renderLearn;
   window.renderLearn = function renderLearnWithAutoRun() {
     originalRenderLearn?.apply(this, arguments);
     ensureStudyControl();
-
     if (!Array.isArray(lList) || lI >= lList.length) {
       if (active && settings().loop && lList.length) {
         lI = 0;
         originalRenderLearn?.apply(this, arguments);
         ensureStudyControl();
         runCurrentCard();
-      } else {
-        setActive(false);
-      }
+      } else setActive(false);
       return;
     }
-
     refreshControl();
-    if (active) {
-      setTimeout(runCurrentCard, 0);
-    }
+    if (active) setTimeout(runCurrentCard, 0);
   };
 
   const originalStart = window.startRecitingSelectedWords;
