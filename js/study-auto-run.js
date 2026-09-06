@@ -215,13 +215,21 @@
 
   function injectSettingsRow() {
     const menu = document.querySelector('#pg-account .menu-sec');
-    if (!menu || document.getElementById('studyAutoRunSettingsRow')) return;
-    const row = document.createElement('div');
-    row.className = 'mr';
-    row.id = 'studyAutoRunSettingsRow';
-    row.onclick = () => window.openStudyAutoRunModal();
-    row.innerHTML = '<div class="ml">Study Auto Run</div><div class="ma"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 18l6-6-6-6"/></svg></div>';
-    menu.appendChild(row);
+    if (!menu) return;
+    let row = document.getElementById('studyAutoRunSettingsRow');
+    if (!row) {
+      row = document.createElement('div');
+      row.className = 'mr';
+      row.id = 'studyAutoRunSettingsRow';
+      row.onclick = () => window.openStudyAutoRunModal();
+      row.innerHTML = '<div class="ml">Study Auto Run</div><div class="ma"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 18l6-6-6-6"/></svg></div>';
+    }
+
+    const voiceRow = [...menu.querySelectorAll('.mr')].find(item =>
+      item.querySelector('.ml')?.textContent.trim() === 'Voice Settings'
+    );
+    if (voiceRow) voiceRow.insertAdjacentElement('afterend', row);
+    else menu.appendChild(row);
   }
 
   window.toggleStudyAutoRun = function toggleStudyAutoRun() {
